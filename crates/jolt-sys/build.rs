@@ -1,5 +1,5 @@
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::Context;
 use walkdir::WalkDir;
@@ -7,9 +7,7 @@ use walkdir::WalkDir;
 fn main() {
     build();
     link();
-    generate_bindings();
-
-    println!("cargo:rerun-if-changed=JoltC/JoltC/.h");
+    generate_bindings().unwrap();
 }
 
 fn build() {
@@ -20,7 +18,7 @@ fn build() {
 fn build_joltc() {
     let mut build = cc::Build::new();
 
-    for entry in WalkDir::new("JoltC") {
+    for entry in WalkDir::new("JoltC/JoltC") {
         let entry = entry.unwrap();
         let file_name = entry
             .file_name()
@@ -34,8 +32,8 @@ fn build_joltc() {
 
     build
         .std("c++17")
-        .include(".")
         .include("JoltC")
+        .include("JoltC/JoltPhysics")
         .cpp(true)
         .compile("JoltC");
 }
@@ -43,7 +41,7 @@ fn build_joltc() {
 fn build_jolt() {
     let mut build = cc::Build::new();
 
-    for entry in WalkDir::new("JoltC/JoltPhysics") {
+    for entry in WalkDir::new("JoltC/JoltPhysics/Jolt") {
         let entry = entry.unwrap();
         let file_name = entry
             .file_name()
@@ -55,7 +53,11 @@ fn build_jolt() {
         }
     }
 
-    build.std("c++17").include(".").cpp(true).compile("Jolt");
+    build
+        .std("c++17")
+        .include("JoltC/JoltPhysics")
+        .cpp(true)
+        .compile("Jolt");
 }
 
 fn link() {
@@ -66,9 +68,11 @@ fn link() {
 fn generate_bindings() -> anyhow::Result<()> {
     let bindings = bindgen::Builder::default()
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        .header("JoltC/JoltC.h")
+        .header("JoltC/JoltC/JoltC.h")
+        .clang_arg("-IJoltC")
         .allowlist_item("JPC_.*")
         .default_enum_style(bindgen::EnumVariation::Consts)
+        .prepend_enum_name(false)
         .generate()
         .context("failed to generate JoltC bindings")?;
 
