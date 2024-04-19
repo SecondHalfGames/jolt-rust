@@ -1,0 +1,55 @@
+name: Test Suite
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-suite:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        rust_version: [stable]
+        build_flags: ["", "--features double-precision", "--features object-layer-u32", "--all-features"]
+
+    runs-on: ${{ matrix.os }}
+    name: Tests - ${{ matrix.os }} ${{ matrix.rust_version }} ${{ matrix.build_flags }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust_version }}
+
+    - uses: swatinem/rust-cache@v2
+
+    - name: Rust Tests
+      run: |
+        cargo test --verbose --workspace ${{ matrix.build_flags }}
+
+  rustfmt:
+    runs-on: ubuntu-latest
+    name: Code Formatting
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        components: rustfmt
+
+    - name: Rustfmt
+      run: |
+        cargo fmt --all --check
