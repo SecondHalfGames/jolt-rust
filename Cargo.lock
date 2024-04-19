@@ -114,6 +114,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
+name = "hello-world"
+version = "0.1.0"
+dependencies = [
+ "jolt",
+]
+
+[[package]]
 name = "hello-world-sys"
 version = "0.1.0"
 dependencies = [
@@ -148,8 +155,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "jolt"
+version = "0.1.0+Jolt-5.0.0"
+dependencies = [
+ "jolt-sys",
+]
+
+[[package]]
 name = "jolt-sys"
-version = "0.1.0"
+version = "0.1.0+Jolt-5.0.0"
 dependencies = [
  "anyhow",
  "bindgen",

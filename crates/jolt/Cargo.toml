@@ -1,15 +1,9 @@
 [package]
-name = "jolt-sys"
+name = "jolt"
 version = "0.1.0+Jolt-5.0.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-[build-dependencies]
-bindgen = "0.69.1"
-cmake = "0.1.50"
-cc = { version = "1.0.94", features = ["parallel"] }
-walkdir = "2.5.0"
-anyhow = "1.0.82"
+jolt-sys = { path = "../jolt-sys" }
