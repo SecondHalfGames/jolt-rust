@@ -5,41 +5,33 @@ use anyhow::Context;
 use walkdir::WalkDir;
 
 fn main() {
-    build();
-    link();
-    generate_bindings().unwrap();
-}
-
-fn build() {
     let flags = build_flags();
 
-    build_jolt(flags.cpp);
-    build_joltc(flags.c);
+    build_jolt(&flags);
+    build_joltc(&flags);
+
+    link();
+
+    generate_bindings(&flags).unwrap();
 }
 
-#[derive(Default)]
-struct BuildFlags {
-    cpp: Vec<(&'static str, &'static str)>,
-    c: Vec<(&'static str, &'static str)>,
-}
-
-fn build_flags() -> BuildFlags {
-    let mut flags = BuildFlags::default();
+fn build_flags() -> Vec<(&'static str, &'static str)> {
+    let mut flags = Vec::new();
 
     if cfg!(feature = "double-precision") {
-        flags.c.push(("JPC_DOUBLE_PRECISION", "ON"));
-        flags.cpp.push(("JPH_DOUBLE_PRECISION", "ON"));
+        flags.push(("JPC_DOUBLE_PRECISION", "ON"));
+        flags.push(("JPH_DOUBLE_PRECISION", "ON"));
     }
 
     if cfg!(feature = "object-layer-u32") {
-        flags.c.push(("JPC_OBJECT_LAYER_BITS", "32"));
-        flags.cpp.push(("JPH_OBJECT_LAYER_BITS", "32"));
+        flags.push(("JPC_OBJECT_LAYER_BITS", "32"));
+        flags.push(("JPH_OBJECT_LAYER_BITS", "32"));
     }
 
     flags
 }
 
-fn build_joltc(flags: Vec<(&'static str, &'static str)>) {
+fn build_joltc(flags: &[(&'static str, &'static str)]) {
     let mut build = cc::Build::new();
 
     for entry in WalkDir::new("JoltC/JoltC") {
@@ -55,7 +47,7 @@ fn build_joltc(flags: Vec<(&'static str, &'static str)>) {
     }
 
     for (key, value) in flags {
-        build.define(key, value);
+        build.define(key, *value);
     }
 
     build
@@ -66,7 +58,7 @@ fn build_joltc(flags: Vec<(&'static str, &'static str)>) {
         .compile("JoltC");
 }
 
-fn build_jolt(flags: Vec<(&'static str, &'static str)>) {
+fn build_jolt(flags: &[(&'static str, &'static str)]) {
     let mut build = cc::Build::new();
 
     for entry in WalkDir::new("JoltC/JoltPhysics/Jolt") {
@@ -82,7 +74,7 @@ fn build_jolt(flags: Vec<(&'static str, &'static str)>) {
     }
 
     for (key, value) in flags {
-        build.define(key, value);
+        build.define(key, *value);
     }
 
     build
@@ -97,14 +89,20 @@ fn link() {
     println!("cargo:rustc-link-lib=JoltC");
 }
 
-fn generate_bindings() -> anyhow::Result<()> {
-    let bindings = bindgen::Builder::default()
+fn generate_bindings(flags: &[(&'static str, &'static str)]) -> anyhow::Result<()> {
+    let mut builder = bindgen::Builder::default()
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .header("JoltC/JoltC/JoltC.h")
         .clang_arg("-IJoltC")
         .allowlist_item("JPC_.*")
         .default_enum_style(bindgen::EnumVariation::Consts)
-        .prepend_enum_name(false)
+        .prepend_enum_name(false);
+
+    for (key, value) in flags {
+        builder = builder.clang_arg(format!("-D{key}={value}"));
+    }
+
+    let bindings = builder
         .generate()
         .context("failed to generate JoltC bindings")?;
 

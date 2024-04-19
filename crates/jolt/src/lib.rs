@@ -11,7 +11,7 @@ use jolt_sys::{
 pub struct ObjectLayer(JPC_ObjectLayer);
 
 impl ObjectLayer {
-    pub const fn new(value: u16) -> Self {
+    pub const fn new(value: JPC_ObjectLayer) -> Self {
         Self(value)
     }
 
@@ -24,7 +24,7 @@ impl ObjectLayer {
 pub struct BroadPhaseLayer(JPC_BroadPhaseLayer);
 
 impl BroadPhaseLayer {
-    pub const fn new(value: u8) -> Self {
+    pub const fn new(value: JPC_BroadPhaseLayer) -> Self {
         Self(value)
     }
 
