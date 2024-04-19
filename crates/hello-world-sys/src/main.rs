@@ -77,17 +77,17 @@ fn main() {
         );
 
         let broad_phase_layer_interface = jolt_sys::JPC_BroadPhaseLayerInterface {
-            self_: ptr::null_mut(),
+            self_: ptr::null(),
             fns: BPL,
         };
 
         let object_vs_broad_phase_layer_filter = jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter {
-            self_: ptr::null_mut(),
+            self_: ptr::null(),
             fns: OVB,
         };
 
         let object_vs_object_layer_filter = jolt_sys::JPC_ObjectLayerPairFilter {
-            self_: ptr::null_mut(),
+            self_: ptr::null(),
             fns: OVO,
         };
 
