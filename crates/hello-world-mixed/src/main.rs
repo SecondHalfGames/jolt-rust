@@ -1,6 +1,7 @@
-use std::ffi::{c_uint, c_void};
+use std::ffi::c_void;
 use std::ptr;
 
+use jolt::{BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer};
 use jolt_sys::{JPC_BroadPhaseLayer, JPC_ObjectLayer};
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
@@ -10,25 +11,21 @@ const BPL_NON_MOVING: JPC_BroadPhaseLayer = 0;
 const BPL_MOVING: JPC_BroadPhaseLayer = 1;
 const BPL_COUNT: JPC_BroadPhaseLayer = 2;
 
-unsafe extern "C" fn bpl_get_num_broad_phase_layers(_this: *mut c_void) -> c_uint {
-    BPL_COUNT as _
-}
+struct BroadPhaseLayers;
 
-unsafe extern "C" fn bpl_get_broad_phase_layer(
-    _this: *mut c_void,
-    layer: JPC_ObjectLayer,
-) -> JPC_BroadPhaseLayer {
-    match layer {
-        OL_NON_MOVING => BPL_NON_MOVING,
-        OL_MOVING => BPL_MOVING,
-        _ => unreachable!(),
+impl BroadPhaseLayerInterface for BroadPhaseLayers {
+    fn get_num_broad_phase_layers(&self) -> u32 {
+        BPL_COUNT as u32
+    }
+
+    fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer {
+        match layer.raw() {
+            OL_NON_MOVING => BroadPhaseLayer::new(BPL_NON_MOVING),
+            OL_MOVING => BroadPhaseLayer::new(BPL_MOVING),
+            _ => unreachable!(),
+        }
     }
 }
-
-const BPL: jolt_sys::JPC_BroadPhaseLayerInterfaceFns = jolt_sys::JPC_BroadPhaseLayerInterfaceFns {
-    GetNumBroadPhaseLayers: Some(bpl_get_num_broad_phase_layers as _),
-    GetBroadPhaseLayer: Some(bpl_get_broad_phase_layer as _),
-};
 
 unsafe extern "C" fn ovb_should_collide(
     _this: *mut c_void,
@@ -76,10 +73,7 @@ fn main() {
             jolt_sys::JPC_MAX_PHYSICS_BARRIERS as _,
         );
 
-        let broad_phase_layer_interface = jolt_sys::JPC_BroadPhaseLayerInterface {
-            self_: ptr::null_mut(),
-            fns: BPL,
-        };
+        let broad_phase_layer_interface = BroadPhaseLayers.leak_raw();
 
         let object_vs_broad_phase_layer_filter = jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter {
             self_: ptr::null_mut(),

@@ -121,6 +121,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "hello-world-mixed"
+version = "0.1.0"
+dependencies = [
+ "jolt",
+ "jolt-sys",
+]
+
+[[package]]
 name = "hello-world-sys"
 version = "0.1.0"
 dependencies = [

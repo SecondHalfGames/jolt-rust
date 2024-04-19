@@ -25,7 +25,7 @@ impl BroadPhaseLayerInterface for BroadPhaseLayers {
 }
 
 fn main() {
-    let _bpl = BroadPhaseLayers.into_raw();
+    let _bpl = BroadPhaseLayers.leak_raw();
 
     println!("Hello, world!");
 }
