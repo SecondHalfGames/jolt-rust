@@ -76,7 +76,7 @@ fn main() {
             jolt_sys::JPC_MAX_PHYSICS_BARRIERS as _,
         );
 
-        let broad_phase_layer_interface = BroadPhaseLayers.leak_raw();
+        let broad_phase_layer_interface = BroadPhaseLayers;
 
         let object_vs_broad_phase_layer_filter = jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter {
             self_: ptr::null_mut(),
@@ -101,7 +101,7 @@ fn main() {
             num_body_mutexes,
             max_body_pairs,
             max_contact_constraints,
-            broad_phase_layer_interface,
+            broad_phase_layer_interface.as_raw(),
             object_vs_broad_phase_layer_filter,
             object_vs_object_layer_filter,
         );

@@ -37,10 +37,8 @@ pub trait BroadPhaseLayerInterface: Sized {
     fn get_num_broad_phase_layers(&self) -> u32;
     fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
 
-    fn leak_raw(self) -> JPC_BroadPhaseLayerInterface {
-        // FIXME: cursed
-        let this = Box::leak(Box::new(self));
-        jpc_bpli(this)
+    fn as_raw(&self) -> JPC_BroadPhaseLayerInterface {
+        jpc_bpli(self)
     }
 }
 
@@ -67,7 +65,7 @@ impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
     }
 }
 
-fn jpc_bpli<T>(input: &mut T) -> JPC_BroadPhaseLayerInterface
+fn jpc_bpli<T>(input: &T) -> JPC_BroadPhaseLayerInterface
 where
     T: BroadPhaseLayerInterface,
 {
@@ -79,7 +77,7 @@ where
     };
 
     JPC_BroadPhaseLayerInterface {
-        self_: ptr::from_mut(input).cast::<c_void>(),
+        self_: ptr::from_ref(input).cast::<c_void>(),
         fns,
     }
 }
