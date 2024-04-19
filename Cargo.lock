@@ -118,13 +118,6 @@ name = "hello-world"
 version = "0.1.0"
 dependencies = [
  "jolt",
-]
-
-[[package]]
-name = "hello-world-mixed"
-version = "0.1.0"
-dependencies = [
- "jolt",
  "jolt-sys",
 ]
 

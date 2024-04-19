@@ -50,17 +50,17 @@ struct BroadPhaseLayerInterfaceBridge<T> {
 
 #[allow(non_snake_case)]
 impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
-    unsafe extern "C" fn GetNumBroadPhaseLayers(this: *mut c_void) -> c_uint {
-        let this = this.cast::<T>().as_mut().unwrap();
+    unsafe extern "C" fn GetNumBroadPhaseLayers(this: *const c_void) -> c_uint {
+        let this = this.cast::<T>().as_ref().unwrap();
 
         this.get_num_broad_phase_layers()
     }
 
     unsafe extern "C" fn GetBroadPhaseLayer(
-        this: *mut c_void,
+        this: *const c_void,
         layer: JPC_ObjectLayer,
     ) -> JPC_BroadPhaseLayer {
-        let this = this.cast::<T>().as_mut().unwrap();
+        let this = this.cast::<T>().as_ref().unwrap();
         let layer = ObjectLayer(layer);
 
         this.get_broad_phase_layer(layer).raw()

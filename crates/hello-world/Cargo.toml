@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 jolt = { path = "../jolt" }
+jolt-sys = { path = "../jolt-sys" }

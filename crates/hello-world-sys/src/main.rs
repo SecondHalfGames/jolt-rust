@@ -10,12 +10,12 @@ const BPL_NON_MOVING: JPC_BroadPhaseLayer = 0;
 const BPL_MOVING: JPC_BroadPhaseLayer = 1;
 const BPL_COUNT: JPC_BroadPhaseLayer = 2;
 
-unsafe extern "C" fn bpl_get_num_broad_phase_layers(_this: *mut c_void) -> c_uint {
+unsafe extern "C" fn bpl_get_num_broad_phase_layers(_this: *const c_void) -> c_uint {
     BPL_COUNT as _
 }
 
 unsafe extern "C" fn bpl_get_broad_phase_layer(
-    _this: *mut c_void,
+    _this: *const c_void,
     layer: JPC_ObjectLayer,
 ) -> JPC_BroadPhaseLayer {
     match layer {
@@ -31,7 +31,7 @@ const BPL: jolt_sys::JPC_BroadPhaseLayerInterfaceFns = jolt_sys::JPC_BroadPhaseL
 };
 
 unsafe extern "C" fn ovb_should_collide(
-    _this: *mut c_void,
+    _this: *const c_void,
     layer1: JPC_ObjectLayer,
     layer2: JPC_BroadPhaseLayer,
 ) -> bool {
@@ -48,7 +48,7 @@ const OVB: jolt_sys::JPC_ObjectVsBroadPhaseLayerFilterFns =
     };
 
 unsafe extern "C" fn ovo_should_collide(
-    _this: *mut c_void,
+    _this: *const c_void,
     layer1: JPC_ObjectLayer,
     layer2: JPC_ObjectLayer,
 ) -> bool {
@@ -140,4 +140,9 @@ fn main() {
     }
 
     println!("Hello, world!");
+}
+
+#[test]
+fn run_main() {
+    main();
 }
