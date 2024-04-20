@@ -126,6 +126,10 @@ fn main() {
         // TODO: RemoveBody and DestroyBody
 
         jolt_sys::JPC_PhysicsSystem_delete(physics_system);
+        jolt_sys::JPC_BroadPhaseLayerInterface_delete(broad_phase_layer_interface);
+        jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter_delete(object_vs_broad_phase_layer_filter);
+        jolt_sys::JPC_ObjectLayerPairFilter_delete(object_vs_object_layer_filter);
+
         jolt_sys::JPC_JobSystemThreadPool_delete(job_system);
         jolt_sys::JPC_TempAllocatorImpl_delete(temp_allocator);
 
