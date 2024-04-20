@@ -171,7 +171,6 @@ fn main() {
         let delta_time = 1.0 / 60.0;
         let collision_steps = 1;
 
-        // TODO: Update loop
         let mut step = 0;
         while JPC_BodyInterface_IsActive(body_interface, sphere_id) {
             step += 1;

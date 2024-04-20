@@ -18,14 +18,26 @@ pub fn register_default_allocator() {
     }
 }
 
-pub fn init_factory() {
+pub fn factory_init() {
     unsafe {
         JPC_FactoryInit();
+    }
+}
+
+pub fn factory_delete() {
+    unsafe {
+        JPC_FactoryDelete();
     }
 }
 
 pub fn register_types() {
     unsafe {
         JPC_RegisterTypes();
+    }
+}
+
+pub fn unregister_types() {
+    unsafe {
+        JPC_UnregisterTypes();
     }
 }

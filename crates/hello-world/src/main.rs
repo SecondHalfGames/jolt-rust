@@ -10,6 +10,13 @@ use jolt_sys::*;
 
 use jolt::{BodyId, BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, Vec3};
 
+const OL_NON_MOVING: JPC_ObjectLayer = 0;
+const OL_MOVING: JPC_ObjectLayer = 1;
+
+const BPL_NON_MOVING: JPC_BroadPhaseLayer = 0;
+const BPL_MOVING: JPC_BroadPhaseLayer = 1;
+const BPL_COUNT: JPC_BroadPhaseLayer = 2;
+
 struct BroadPhaseLayers;
 
 impl BroadPhaseLayerInterface for BroadPhaseLayers {
@@ -25,13 +32,6 @@ impl BroadPhaseLayerInterface for BroadPhaseLayers {
         }
     }
 }
-
-const OL_NON_MOVING: JPC_ObjectLayer = 0;
-const OL_MOVING: JPC_ObjectLayer = 1;
-
-const BPL_NON_MOVING: JPC_BroadPhaseLayer = 0;
-const BPL_MOVING: JPC_BroadPhaseLayer = 1;
-const BPL_COUNT: JPC_BroadPhaseLayer = 2;
 
 unsafe extern "C" fn ovb_should_collide(
     _this: *const c_void,
@@ -75,7 +75,7 @@ fn rvec3(x: Real, y: Real, z: Real) -> JPC_RVec3 {
 
 fn main() {
     jolt::register_default_allocator();
-    jolt::init_factory();
+    jolt::factory_init();
     jolt::register_types();
 
     unsafe {
@@ -168,7 +168,6 @@ fn main() {
         let delta_time = 1.0 / 60.0;
         let collision_steps = 1;
 
-        // TODO: Update loop
         let mut step = 0;
         while body_interface.is_active(sphere_id) {
             step += 1;
@@ -196,10 +195,10 @@ fn main() {
 
         JPC_JobSystemThreadPool_delete(job_system);
         JPC_TempAllocatorImpl_delete(temp_allocator);
-
-        JPC_UnregisterTypes();
-        JPC_FactoryDelete();
     }
+
+    jolt::unregister_types();
+    jolt::factory_delete();
 
     println!("Hello, world!");
 }
