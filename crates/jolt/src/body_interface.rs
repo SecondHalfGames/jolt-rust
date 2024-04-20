@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use jolt_sys::*;
 
-use crate::{BodyId, Vec3};
+use crate::{BodyId, RVec3, Vec3};
 
 pub struct BodyInterface<'physics_system> {
     raw: *mut JPC_BodyInterface,
@@ -41,7 +41,7 @@ impl<'physics_system> BodyInterface<'physics_system> {
         unsafe { JPC_BodyInterface_IsActive(self.raw, body_id.raw()) }
     }
 
-    pub fn center_of_mass_position(&self, body_id: BodyId) -> Vec3 {
+    pub fn center_of_mass_position(&self, body_id: BodyId) -> RVec3 {
         unsafe { JPC_BodyInterface_GetCenterOfMassPosition(self.raw, body_id.raw()).into() }
     }
 
