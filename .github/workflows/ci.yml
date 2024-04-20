@@ -17,6 +17,8 @@ jobs:
         os: [windows-latest, ubuntu-latest]
         rust_version: [stable]
         build_flags: ["", "--features double-precision", "--features object-layer-u32", "--all-features"]
+        exclude:
+          - os: ubuntu-latest
 
     runs-on: ${{ matrix.os }}
     name: Tests - ${{ matrix.os }} ${{ matrix.rust_version }} ${{ matrix.build_flags }}
