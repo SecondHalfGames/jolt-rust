@@ -164,17 +164,22 @@ fn main() {
         let sphere_id = JPC_Body_GetID(sphere);
         JPC_BodyInterface_AddBody(body_interface, sphere_id, JPC_ACTIVATION_ACTIVATE);
 
+        JPC_BodyInterface_SetLinearVelocity(body_interface, sphere_id, vec3(0.0, -5.0, 0.0));
+
         // TODO: PhysicsSystem::OptimizeBroadPhase
 
         let delta_time = 1.0 / 60.0;
         let collision_steps = 1;
 
         // TODO: Update loop
-        for i in 0..35 {
+        let mut step = 0;
+        while JPC_BodyInterface_IsActive(body_interface, sphere_id) {
+            step += 1;
+
             let position = JPC_BodyInterface_GetCenterOfMassPosition(body_interface, sphere_id);
             let velocity = JPC_BodyInterface_GetLinearVelocity(body_interface, sphere_id);
             println!(
-                "Step {i}: Position = ({}, {}, {}), Velocity = ({}, {}, {})",
+                "Step {step}: Position = ({}, {}, {}), Velocity = ({}, {}, {})",
                 position.x, position.y, position.z, velocity.x, velocity.y, velocity.z
             );
 
