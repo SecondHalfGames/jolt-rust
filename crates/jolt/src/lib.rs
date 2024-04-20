@@ -4,7 +4,7 @@ use std::ptr;
 
 use jolt_sys::{
     JPC_BroadPhaseLayer, JPC_BroadPhaseLayerInterface, JPC_BroadPhaseLayerInterfaceFns,
-    JPC_ObjectLayer,
+    JPC_BroadPhaseLayerInterface_new, JPC_ObjectLayer,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,7 +37,7 @@ pub trait BroadPhaseLayerInterface: Sized {
     fn get_num_broad_phase_layers(&self) -> u32;
     fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
 
-    fn as_raw(&self) -> JPC_BroadPhaseLayerInterface {
+    fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface {
         jpc_bpli(self)
     }
 }
@@ -65,7 +65,7 @@ impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
     }
 }
 
-fn jpc_bpli<T>(input: &T) -> JPC_BroadPhaseLayerInterface
+fn jpc_bpli<T>(input: &T) -> *mut JPC_BroadPhaseLayerInterface
 where
     T: BroadPhaseLayerInterface,
 {
@@ -76,8 +76,5 @@ where
         GetBroadPhaseLayer: Some(Bridge::<T>::GetBroadPhaseLayer as _),
     };
 
-    JPC_BroadPhaseLayerInterface {
-        self_: ptr::from_ref(input).cast::<c_void>(),
-        fns,
-    }
+    unsafe { JPC_BroadPhaseLayerInterface_new(ptr::from_ref(input).cast::<c_void>(), fns) }
 }

@@ -78,15 +78,11 @@ fn main() {
 
         let broad_phase_layer_interface = BroadPhaseLayers;
 
-        let object_vs_broad_phase_layer_filter = jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter {
-            self_: ptr::null_mut(),
-            fns: OVB,
-        };
+        let object_vs_broad_phase_layer_filter =
+            jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter_new(ptr::null_mut(), OVB);
 
-        let object_vs_object_layer_filter = jolt_sys::JPC_ObjectLayerPairFilter {
-            self_: ptr::null_mut(),
-            fns: OVO,
-        };
+        let object_vs_object_layer_filter =
+            jolt_sys::JPC_ObjectLayerPairFilter_new(ptr::null_mut(), OVO);
 
         let physics_system = jolt_sys::JPC_PhysicsSystem_new();
 

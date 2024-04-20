@@ -76,20 +76,14 @@ fn main() {
             jolt_sys::JPC_MAX_PHYSICS_BARRIERS as _,
         );
 
-        let broad_phase_layer_interface = jolt_sys::JPC_BroadPhaseLayerInterface {
-            self_: ptr::null(),
-            fns: BPL,
-        };
+        let broad_phase_layer_interface =
+            jolt_sys::JPC_BroadPhaseLayerInterface_new(ptr::null(), BPL);
 
-        let object_vs_broad_phase_layer_filter = jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter {
-            self_: ptr::null(),
-            fns: OVB,
-        };
+        let object_vs_broad_phase_layer_filter =
+            jolt_sys::JPC_ObjectVsBroadPhaseLayerFilter_new(ptr::null_mut(), OVB);
 
-        let object_vs_object_layer_filter = jolt_sys::JPC_ObjectLayerPairFilter {
-            self_: ptr::null(),
-            fns: OVO,
-        };
+        let object_vs_object_layer_filter =
+            jolt_sys::JPC_ObjectLayerPairFilter_new(ptr::null_mut(), OVO);
 
         let physics_system = jolt_sys::JPC_PhysicsSystem_new();
 
