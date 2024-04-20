@@ -2,34 +2,30 @@ use jolt_sys::*;
 
 mod body_interface;
 mod interfaces;
+mod math;
 mod physics_system;
+mod simple_types;
 
 pub use crate::body_interface::*;
 pub use crate::interfaces::*;
+pub use crate::math::*;
 pub use crate::physics_system::*;
+pub use crate::simple_types::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ObjectLayer(JPC_ObjectLayer);
-
-impl ObjectLayer {
-    pub const fn new(value: JPC_ObjectLayer) -> Self {
-        Self(value)
-    }
-
-    pub const fn raw(self) -> JPC_ObjectLayer {
-        self.0
+pub fn register_default_allocator() {
+    unsafe {
+        JPC_RegisterDefaultAllocator();
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct BroadPhaseLayer(JPC_BroadPhaseLayer);
-
-impl BroadPhaseLayer {
-    pub const fn new(value: JPC_BroadPhaseLayer) -> Self {
-        Self(value)
+pub fn init_factory() {
+    unsafe {
+        JPC_FactoryInit();
     }
+}
 
-    pub const fn raw(self) -> JPC_BroadPhaseLayer {
-        self.0
+pub fn register_types() {
+    unsafe {
+        JPC_RegisterTypes();
     }
 }

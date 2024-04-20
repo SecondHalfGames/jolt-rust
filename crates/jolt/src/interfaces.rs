@@ -14,6 +14,8 @@ pub trait BroadPhaseLayerInterface: Sized {
     fn get_num_broad_phase_layers(&self) -> u32;
     fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
 
+    // FIXME: This is more like 'create_raw' because it allocates an object that
+    // should be later deallocated.
     fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface {
         type Bridge<T> = BroadPhaseLayerInterfaceBridge<T>;
 
@@ -58,7 +60,7 @@ impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
         layer: JPC_ObjectLayer,
     ) -> JPC_BroadPhaseLayer {
         let this = this.cast::<T>().as_ref().unwrap();
-        let layer = ObjectLayer(layer);
+        let layer = ObjectLayer::new(layer);
 
         this.get_broad_phase_layer(layer).raw()
     }

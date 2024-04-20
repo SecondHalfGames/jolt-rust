@@ -10,7 +10,7 @@ impl PhysicsSystem {
     }
 
     /// # Safety
-    /// no
+    /// not really
     pub unsafe fn init(
         &self,
         max_bodies: u32,
@@ -35,8 +35,31 @@ impl PhysicsSystem {
         }
     }
 
-    pub fn body_interface(&self) -> BodyInterface {
-        unsafe { BodyInterface::new(JPC_PhysicsSystem_GetBodyInterface(self.0)) }
+    /// # Safety
+    /// definitely not
+    pub unsafe fn update(
+        &self,
+        delta_time: f32,
+        collision_steps: i32,
+        temp_allocator: *mut JPC_TempAllocatorImpl,
+        job_system: *mut JPC_JobSystemThreadPool,
+    ) {
+        unsafe {
+            JPC_PhysicsSystem_Update(
+                self.0,
+                delta_time,
+                collision_steps,
+                temp_allocator,
+                job_system,
+            );
+        }
+    }
+
+    pub fn body_interface(&self) -> BodyInterface<'_> {
+        unsafe {
+            let raw = JPC_PhysicsSystem_GetBodyInterface(self.0);
+            BodyInterface::new(raw)
+        }
     }
 
     pub fn as_raw(&self) -> *mut JPC_PhysicsSystem {

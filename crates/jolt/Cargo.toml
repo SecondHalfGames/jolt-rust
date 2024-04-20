@@ -3,7 +3,9 @@ name = "jolt"
 version = "0.1.0+Jolt-5.0.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+double-precision = ["jolt-sys/double-precision"]
+object-layer-u32 = ["jolt-sys/object-layer-u32"]
 
 [dependencies]
 jolt-sys = { path = "../jolt-sys" }
