@@ -2,17 +2,40 @@ use std::env;
 use std::path::Path;
 
 use anyhow::Context;
-use walkdir::WalkDir;
 
 fn main() {
     let flags = build_flags();
 
-    build_jolt(&flags);
-    build_joltc(&flags);
+    build_joltc();
 
     link();
 
     generate_bindings(&flags).unwrap();
+}
+
+fn build_joltc() {
+    let mut config = cmake::Config::new("JoltC");
+
+    if cfg!(windows) {
+        config.cxxflag("/EHsc");
+    }
+
+    if cfg!(feature = "double-precision") {
+        config.configure_arg("-DDOUBLE_PRECISION=ON");
+    }
+
+    if cfg!(feature = "object-layer-u32") {
+        config.configure_arg("-DOBJECT_LAYER_BITS=32");
+    }
+
+    let dst = config.build();
+
+    println!("cargo:rustc-link-search=native={}", dst.display());
+}
+
+fn link() {
+    println!("cargo:rustc-link-lib=Jolt");
+    println!("cargo:rustc-link-lib=joltc");
 }
 
 fn build_flags() -> Vec<(&'static str, &'static str)> {
@@ -31,64 +54,6 @@ fn build_flags() -> Vec<(&'static str, &'static str)> {
     }
 
     flags
-}
-
-fn build_joltc(flags: &[(&'static str, &'static str)]) {
-    let mut build = cc::Build::new();
-
-    for entry in WalkDir::new("JoltC/JoltC") {
-        let entry = entry.unwrap();
-        let file_name = entry
-            .file_name()
-            .to_str()
-            .expect("file was not valid UTF-8");
-
-        if file_name.ends_with(".cpp") {
-            build.file(entry.path());
-        }
-    }
-
-    for (key, value) in flags {
-        build.define(key, *value);
-    }
-
-    build
-        .std("c++17")
-        .include("JoltC")
-        .include("JoltC/JoltPhysics")
-        .cpp(true)
-        .compile("JoltC");
-}
-
-fn build_jolt(flags: &[(&'static str, &'static str)]) {
-    let mut build = cc::Build::new();
-
-    for entry in WalkDir::new("JoltC/JoltPhysics/Jolt") {
-        let entry = entry.unwrap();
-        let file_name = entry
-            .file_name()
-            .to_str()
-            .expect("file was not valid UTF-8");
-
-        if file_name.ends_with(".cpp") {
-            build.file(entry.path());
-        }
-    }
-
-    for (key, value) in flags {
-        build.define(key, *value);
-    }
-
-    build
-        .std("c++17")
-        .include("JoltC/JoltPhysics")
-        .cpp(true)
-        .compile("Jolt");
-}
-
-fn link() {
-    println!("cargo:rustc-link-lib=Jolt");
-    println!("cargo:rustc-link-lib=JoltC");
 }
 
 fn generate_bindings(flags: &[(&'static str, &'static str)]) -> anyhow::Result<()> {
