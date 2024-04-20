@@ -1,7 +1,13 @@
-use std::ffi::{c_uint, c_void};
+use std::ffi::{c_uint, c_void, CStr};
+use std::mem::MaybeUninit;
 use std::ptr;
 
-use jolt_sys::{JPC_BroadPhaseLayer, JPC_ObjectLayer};
+use jolt_sys::{
+    JPC_BodyInterface_AddBody, JPC_BodyInterface_CreateBody,
+    JPC_BodyInterface_GetCenterOfMassPosition, JPC_BodyInterface_GetLinearVelocity, JPC_Body_GetID,
+    JPC_BroadPhaseLayer, JPC_ObjectLayer, Real, JPC_ACTIVATION_ACTIVATE,
+    JPC_ACTIVATION_DONT_ACTIVATE, JPC_MOTION_TYPE_DYNAMIC, JPC_MOTION_TYPE_STATIC,
+};
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
 const OL_MOVING: JPC_ObjectLayer = 1;
@@ -63,6 +69,14 @@ const OVO: jolt_sys::JPC_ObjectLayerPairFilterFns = jolt_sys::JPC_ObjectLayerPai
     ShouldCollide: Some(ovo_should_collide as _),
 };
 
+fn vec3(x: f32, y: f32, z: f32) -> jolt_sys::JPC_Vec3 {
+    jolt_sys::JPC_Vec3 { x, y, z, _w: z }
+}
+
+fn rvec3(x: Real, y: Real, z: Real) -> jolt_sys::JPC_RVec3 {
+    jolt_sys::JPC_RVec3 { x, y, z, _w: z }
+}
+
 fn main() {
     unsafe {
         jolt_sys::JPC_RegisterDefaultAllocator();
@@ -105,15 +119,80 @@ fn main() {
 
         // TODO: register body activation listener
         // TODO: register contact listener
-        // TODO: body interface
-        // TODO: creating bodies
+
+        let body_interface = jolt_sys::JPC_PhysicsSystem_GetBodyInterface(physics_system);
+
+        let floor_shape_settings = jolt_sys::JPC_BoxShapeSettings_new(vec3(100.0, 1.0, 100.0));
+
+        let mut floor_shape: *mut jolt_sys::JPC_Shape = ptr::null_mut();
+        let mut err: *mut jolt_sys::JPC_String = ptr::null_mut();
+        if !jolt_sys::JPC_ShapeSettings_Create(
+            floor_shape_settings.cast::<jolt_sys::JPC_ShapeSettings>(),
+            &mut floor_shape,
+            &mut err,
+        ) {
+            panic!(
+                "Fatal error: {:?}",
+                CStr::from_ptr(jolt_sys::JPC_String_c_str(err))
+            );
+        }
+
+        let mut floor_settings = MaybeUninit::<jolt_sys::JPC_BodyCreationSettings>::zeroed();
+        jolt_sys::JPC_BodyCreationSettings_default(floor_settings.as_mut_ptr());
+        let mut floor_settings = floor_settings.assume_init();
+        floor_settings.Position = rvec3(0.0, -1.0, 0.0);
+        floor_settings.MotionType = JPC_MOTION_TYPE_STATIC;
+        floor_settings.ObjectLayer = OL_NON_MOVING;
+        floor_settings.Shape = floor_shape; // FIXME: Should be const
+
+        let floor = JPC_BodyInterface_CreateBody(body_interface, &mut floor_settings);
+        JPC_BodyInterface_AddBody(
+            body_interface,
+            JPC_Body_GetID(floor),
+            JPC_ACTIVATION_DONT_ACTIVATE,
+        );
+
+        let sphere_shape_settings = jolt_sys::JPC_SphereShapeSettings_new(0.5);
+
+        let mut sphere_shape: *mut jolt_sys::JPC_Shape = ptr::null_mut();
+        let mut err: *mut jolt_sys::JPC_String = ptr::null_mut();
+        if !jolt_sys::JPC_ShapeSettings_Create(
+            sphere_shape_settings.cast::<jolt_sys::JPC_ShapeSettings>(),
+            &mut sphere_shape,
+            &mut err,
+        ) {
+            panic!(
+                "Fatal error: {:?}",
+                CStr::from_ptr(jolt_sys::JPC_String_c_str(err))
+            );
+        }
+
+        let mut sphere_settings = MaybeUninit::<jolt_sys::JPC_BodyCreationSettings>::zeroed();
+        jolt_sys::JPC_BodyCreationSettings_default(sphere_settings.as_mut_ptr());
+        let mut sphere_settings = sphere_settings.assume_init();
+        sphere_settings.Position = rvec3(0.0, 2.0, 0.0);
+        sphere_settings.MotionType = JPC_MOTION_TYPE_DYNAMIC;
+        sphere_settings.ObjectLayer = OL_MOVING;
+        sphere_settings.Shape = sphere_shape; // FIXME: Should be const
+
+        let sphere = JPC_BodyInterface_CreateBody(body_interface, &mut sphere_settings);
+        let sphere_id = JPC_Body_GetID(sphere);
+        JPC_BodyInterface_AddBody(body_interface, sphere_id, JPC_ACTIVATION_ACTIVATE);
+
         // TODO: PhysicsSystem::OptimizeBroadPhase
 
         let delta_time = 1.0 / 60.0;
         let collision_steps = 1;
 
         // TODO: Update loop
-        for _i in 0..100 {
+        for i in 0..35 {
+            let position = JPC_BodyInterface_GetCenterOfMassPosition(body_interface, sphere_id);
+            let velocity = JPC_BodyInterface_GetLinearVelocity(body_interface, sphere_id);
+            println!(
+                "Step {i}: Position = ({}, {}, {}), Velocity = ({}, {}, {})",
+                position.x, position.y, position.z, velocity.x, velocity.y, velocity.z
+            );
+
             jolt_sys::JPC_PhysicsSystem_Update(
                 physics_system,
                 delta_time,
