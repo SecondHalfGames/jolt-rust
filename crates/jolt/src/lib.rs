@@ -1,11 +1,12 @@
-use std::ffi::{c_uint, c_void};
-use std::marker::PhantomData;
-use std::ptr;
+use jolt_sys::*;
 
-use jolt_sys::{
-    JPC_BroadPhaseLayer, JPC_BroadPhaseLayerInterface, JPC_BroadPhaseLayerInterfaceFns,
-    JPC_BroadPhaseLayerInterface_new, JPC_ObjectLayer,
-};
+mod body_interface;
+mod interfaces;
+mod physics_system;
+
+pub use crate::body_interface::*;
+pub use crate::interfaces::*;
+pub use crate::physics_system::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ObjectLayer(JPC_ObjectLayer);
@@ -31,50 +32,4 @@ impl BroadPhaseLayer {
     pub const fn raw(self) -> JPC_BroadPhaseLayer {
         self.0
     }
-}
-
-pub trait BroadPhaseLayerInterface: Sized {
-    fn get_num_broad_phase_layers(&self) -> u32;
-    fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
-
-    fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface {
-        jpc_bpli(self)
-    }
-}
-
-struct BroadPhaseLayerInterfaceBridge<T> {
-    _phantom: PhantomData<T>,
-}
-
-#[allow(non_snake_case)]
-impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
-    unsafe extern "C" fn GetNumBroadPhaseLayers(this: *const c_void) -> c_uint {
-        let this = this.cast::<T>().as_ref().unwrap();
-
-        this.get_num_broad_phase_layers()
-    }
-
-    unsafe extern "C" fn GetBroadPhaseLayer(
-        this: *const c_void,
-        layer: JPC_ObjectLayer,
-    ) -> JPC_BroadPhaseLayer {
-        let this = this.cast::<T>().as_ref().unwrap();
-        let layer = ObjectLayer(layer);
-
-        this.get_broad_phase_layer(layer).raw()
-    }
-}
-
-fn jpc_bpli<T>(input: &T) -> *mut JPC_BroadPhaseLayerInterface
-where
-    T: BroadPhaseLayerInterface,
-{
-    type Bridge<T> = BroadPhaseLayerInterfaceBridge<T>;
-
-    let fns = JPC_BroadPhaseLayerInterfaceFns {
-        GetNumBroadPhaseLayers: Some(Bridge::<T>::GetNumBroadPhaseLayers as _),
-        GetBroadPhaseLayer: Some(Bridge::<T>::GetBroadPhaseLayer as _),
-    };
-
-    unsafe { JPC_BroadPhaseLayerInterface_new(ptr::from_ref(input).cast::<c_void>(), fns) }
 }

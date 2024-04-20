@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 jolt-sys = { path = "../jolt-sys" }
+
+[lints.clippy]
+new_without_default = { level = "allow" }
+too_many_arguments = { level = "allow" }
