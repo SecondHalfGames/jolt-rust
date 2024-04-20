@@ -18,6 +18,8 @@ fn main() {
 fn build_flags() -> Vec<(&'static str, &'static str)> {
     let mut flags = Vec::new();
 
+    flags.push(("JPH_DEBUG_RENDERER", "ON"));
+
     if cfg!(feature = "double-precision") {
         flags.push(("JPC_DOUBLE_PRECISION", "ON"));
         flags.push(("JPH_DOUBLE_PRECISION", "ON"));
