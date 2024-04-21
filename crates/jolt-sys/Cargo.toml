@@ -1,6 +1,9 @@
 [package]
 name = "jolt-sys"
+description = "Unsafe bindings to Jolt Physics"
 version = "0.1.0+Jolt-5.0.0"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/SecondHalfGames/jolt-rust"
 edition = "2021"
 
 [features]
@@ -17,4 +20,4 @@ bindgen = "0.69.1"
 cmake = "0.1.50"
 cc = { version = "1.0.94", features = ["parallel"] }
 walkdir = "2.5.0"
-anyhow = "1.0.82"
+anyhow = "1.0.69"
