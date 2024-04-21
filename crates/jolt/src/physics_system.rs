@@ -1,3 +1,5 @@
+use std::ptr;
+
 use jolt_sys::*;
 
 use crate::{BodyInterface, IntoBroadPhaseLayerInterface};
@@ -52,6 +54,18 @@ impl PhysicsSystem {
                 temp_allocator,
                 job_system,
             );
+        }
+    }
+
+    /// # Safety
+    /// `renderer` must be valid and non-null.
+    pub unsafe fn draw_bodies(
+        &self,
+        settings: &mut JPC_BodyManager_DrawSettings,
+        renderer: *mut JPC_DebugRendererSimple,
+    ) {
+        unsafe {
+            JPC_PhysicsSystem_DrawBodies(self.0, settings, renderer, ptr::null());
         }
     }
 
