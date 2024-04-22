@@ -12,10 +12,26 @@ This project is an early work in progress. Watch for exposed nails.
 ### `joltc-sys` — Jolt bindings via [JoltC]
 This crate contains unsafe bindings to JoltC.
 
+```toml
+joltc-sys = "0.1.0"
+```
+
+Features:
+- `double-precision`: Enable higher precision simulation using doubles instead of floats.
+- `object-layer-u32`: Changes the ObjectLayer type to use 32 bits instead of 16 bits.
+
 ### `rolt` — aspirationally safe Rust Jolt bindings
 This crate contains a higher-level wrapper around JoltC, providing ergonomics comparable to using Jolt from C++.
 
 The safety of this crate is currently provided on a best-effort basis.
+
+```toml
+rolt = "0.1.0"
+```
+
+Features:
+- `double-precision`: Forwards to `joltc-sys/double-precision`
+- `object-layer-u32`: Forwards to `joltc-sys/object-layer-u32`
 
 ### `hello-world-sys` — HelloWorld using `jolt-sys`
 This is a port of Jolt's [HelloWorld] example to Rust using `jolt-sys`. It isn't pretty nor safe, but it does have identical behavior.
