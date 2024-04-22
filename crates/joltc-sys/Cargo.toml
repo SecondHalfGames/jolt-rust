@@ -6,11 +6,15 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/SecondHalfGames/jolt-rust"
 edition = "2021"
 
+exclude = ["JoltC/JoltPhysics/Assets", "JoltC/JoltPhysics/TestFramework", "JoltC/JoltPhysics/Samples", "JoltC/JoltPhysics/UnitTests"]
+
 [features]
 default = []
 
+# Changes all world coordinates to use f64 instead of 32 coordinates.
 double-precision = []
 
+# Changes ObjectLayer and related types to be u32 instead of u16.
 object-layer-u32 = []
 
 [dependencies]
