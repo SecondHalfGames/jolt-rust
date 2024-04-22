@@ -5,10 +5,10 @@ use std::ffi::{c_void, CStr};
 use std::mem::MaybeUninit;
 use std::ptr;
 
-// Everything prefixed with `JPC_` comes from the jolt_sys crate.
-use jolt_sys::*;
+// Everything prefixed with `JPC_` comes from the joltc_sys crate.
+use joltc_sys::*;
 
-use jolt::{BodyId, BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, Vec3};
+use rolt::{BodyId, BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, Vec3};
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
 const OL_MOVING: JPC_ObjectLayer = 1;
@@ -74,9 +74,9 @@ fn rvec3(x: Real, y: Real, z: Real) -> JPC_RVec3 {
 }
 
 fn main() {
-    jolt::register_default_allocator();
-    jolt::factory_init();
-    jolt::register_types();
+    rolt::register_default_allocator();
+    rolt::factory_init();
+    rolt::register_types();
 
     unsafe {
         let temp_allocator = JPC_TempAllocatorImpl_new(10 * 1024 * 1024);
@@ -91,7 +91,7 @@ fn main() {
 
         let object_vs_object_layer_filter = JPC_ObjectLayerPairFilter_new(ptr::null_mut(), OVO);
 
-        let physics_system = jolt::PhysicsSystem::new();
+        let physics_system = rolt::PhysicsSystem::new();
 
         let max_bodies = 1024;
         let num_body_mutexes = 0;
@@ -197,8 +197,8 @@ fn main() {
         JPC_TempAllocatorImpl_delete(temp_allocator);
     }
 
-    jolt::unregister_types();
-    jolt::factory_delete();
+    rolt::unregister_types();
+    rolt::factory_delete();
 
     println!("Hello, world!");
 }

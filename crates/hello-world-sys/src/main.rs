@@ -2,8 +2,8 @@ use std::ffi::{c_uint, c_void, CStr};
 use std::mem::MaybeUninit;
 use std::ptr;
 
-// Everything prefixed with `JPC_` comes from the jolt_sys crate.
-use jolt_sys::*;
+// Everything prefixed with `JPC_` comes from the joltc_sys crate.
+use joltc_sys::*;
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
 const OL_MOVING: JPC_ObjectLayer = 1;

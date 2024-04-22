@@ -1,6 +1,6 @@
-use jolt_sys::{JPC_Color, JPC_DVec3, JPC_Quat, JPC_Vec3};
+use joltc_sys::{JPC_Color, JPC_DVec3, JPC_Quat, JPC_Vec3};
 
-pub use jolt_sys::Real;
+pub use joltc_sys::Real;
 
 #[cfg(feature = "double-precision")]
 pub type RVec3 = DVec3;

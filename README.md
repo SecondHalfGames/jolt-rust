@@ -4,15 +4,15 @@ Rust bindings for [Jolt Physics](https://github.com/jrouwe/JoltPhysics) 5.0.0 us
 This project is an early work in progress. Watch for exposed nails.
 
 ## Goals
-1. `jolt-sys`: Functioning, up-to-date unsafe bindings to Jolt Physics
-2. `jolt`: Ergonomic, safe bindings to Jolt Physics
+1. `joltc-sys`: Functioning, up-to-date unsafe bindings to Jolt Physics
+2. `rolt`: Ergonomic, safe bindings to Jolt Physics
 
 ## Crates
 
-### `jolt-sys` — Jolt bindings via [JoltC]
+### `joltc-sys` — Jolt bindings via [JoltC]
 This crate contains unsafe bindings to JoltC.
 
-### `jolt` — aspirationally safe Rust Jolt bindings
+### `rolt` — aspirationally safe Rust Jolt bindings
 This crate contains a higher-level wrapper around JoltC, providing ergonomics comparable to using Jolt from C++.
 
 The safety of this crate is currently provided on a best-effort basis.
@@ -22,6 +22,13 @@ This is a port of Jolt's [HelloWorld] example to Rust using `jolt-sys`. It isn't
 
 ### `hello-world` — HelloWorld using `jolt`
 This is a port of Jolt's [HelloWorld] example to Rust using the `jolt` crate. The goal of this example is to replicate the behavior of the original example entirely in safe Rust.
+
+## Submodules
+This repository uses Git submodules. Make sure to initialize submodules recursively so that JoltC and Jolt are both referenced correctly in your checkout:
+
+```bash
+git submodule update --init --recursive
+```
 
 ## License
 Licensed under either of

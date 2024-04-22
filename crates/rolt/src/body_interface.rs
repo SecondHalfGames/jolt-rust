@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use jolt_sys::*;
+use joltc_sys::*;
 
 use crate::{BodyId, RVec3, Vec3};
 

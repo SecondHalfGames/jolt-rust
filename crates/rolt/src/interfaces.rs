@@ -2,7 +2,7 @@ use std::ffi::{c_uint, c_void};
 use std::marker::PhantomData;
 use std::ptr;
 
-use jolt_sys::*;
+use joltc_sys::*;
 
 use crate::{BroadPhaseLayer, ObjectLayer};
 

@@ -1,4 +1,4 @@
-use jolt_sys::*;
+use joltc_sys::*;
 
 mod body_interface;
 mod interfaces;

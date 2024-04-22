@@ -1,6 +1,6 @@
 use std::ptr;
 
-use jolt_sys::*;
+use joltc_sys::*;
 
 use crate::{BodyInterface, IntoBroadPhaseLayerInterface};
 

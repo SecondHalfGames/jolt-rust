@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-jolt = { path = "../jolt" }
-jolt-sys = { path = "../jolt-sys" }
+rolt = { path = "../rolt" }
+joltc-sys = { path = "../joltc-sys" }

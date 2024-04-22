@@ -1,4 +1,4 @@
-use jolt_sys::*;
+use joltc_sys::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ObjectLayer(JPC_ObjectLayer);

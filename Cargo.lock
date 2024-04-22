@@ -117,15 +117,15 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 name = "hello-world"
 version = "0.1.0"
 dependencies = [
- "jolt",
- "jolt-sys",
+ "joltc-sys",
+ "rolt",
 ]
 
 [[package]]
 name = "hello-world-sys"
 version = "0.1.0"
 dependencies = [
- "jolt-sys",
+ "joltc-sys",
 ]
 
 [[package]]
@@ -156,14 +156,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "jolt"
-version = "0.1.0+Jolt-5.0.0"
-dependencies = [
- "jolt-sys",
-]
-
-[[package]]
-name = "jolt-sys"
+name = "joltc-sys"
 version = "0.1.0+Jolt-5.0.0"
 dependencies = [
  "anyhow",
@@ -297,6 +290,13 @@ name = "regex-syntax"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
+
+[[package]]
+name = "rolt"
+version = "0.1.0+Jolt-5.0.0"
+dependencies = [
+ "joltc-sys",
+]
 
 [[package]]
 name = "rustc-hash"

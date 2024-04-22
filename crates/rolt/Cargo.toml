@@ -1,5 +1,5 @@
 [package]
-name = "jolt"
+name = "rolt"
 description = "Safe(-ish) bindings to Jolt Physics"
 version = "0.1.0+Jolt-5.0.0"
 license = "MIT OR Apache-2.0"
@@ -7,11 +7,11 @@ repository = "https://github.com/SecondHalfGames/jolt-rust"
 edition = "2021"
 
 [features]
-double-precision = ["jolt-sys/double-precision"]
-object-layer-u32 = ["jolt-sys/object-layer-u32"]
+double-precision = ["joltc-sys/double-precision"]
+object-layer-u32 = ["joltc-sys/object-layer-u32"]
 
 [dependencies]
-jolt-sys = { version = "0.1.0", path = "../jolt-sys" }
+joltc-sys = { version = "0.1.0", path = "../joltc-sys" }
 
 [lints.clippy]
 new_without_default = { level = "allow" }
