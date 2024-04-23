@@ -13,7 +13,7 @@ This project is an early work in progress. Watch for exposed nails.
 This crate contains unsafe bindings to JoltC.
 
 ```toml
-joltc-sys = "0.1.0"
+joltc-sys = "0.2.0"
 ```
 
 Features:
@@ -26,17 +26,17 @@ This crate contains a higher-level wrapper around JoltC, providing ergonomics co
 The safety of this crate is currently provided on a best-effort basis.
 
 ```toml
-rolt = "0.1.0"
+rolt = "0.2.0"
 ```
 
 Features:
 - `double-precision`: Forwards to `joltc-sys/double-precision`
 - `object-layer-u32`: Forwards to `joltc-sys/object-layer-u32`
 
-### `hello-world-sys` — HelloWorld using `jolt-sys`
+### `hello-world-sys` — HelloWorld using `joltc-sys`
 This is a port of Jolt's [HelloWorld] example to Rust using `jolt-sys`. It isn't pretty nor safe, but it does have identical behavior.
 
-### `hello-world` — HelloWorld using `jolt`
+### `hello-world` — HelloWorld using `rolt`
 This is a port of Jolt's [HelloWorld] example to Rust using the `jolt` crate. The goal of this example is to replicate the behavior of the original example entirely in safe Rust.
 
 ## Submodules
