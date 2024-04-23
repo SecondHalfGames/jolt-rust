@@ -37,6 +37,12 @@ impl PhysicsSystem {
         }
     }
 
+    pub fn optimize_broad_phase(&self) {
+        unsafe {
+            JPC_PhysicsSystem_OptimizeBroadPhase(self.0);
+        }
+    }
+
     /// # Safety
     /// definitely not
     pub unsafe fn update(

@@ -1,5 +1,4 @@
-use std::ffi::{c_uint, c_void, CStr};
-use std::mem::MaybeUninit;
+use std::ffi::{c_uint, c_void, CStr, CString};
 use std::ptr;
 
 // Everything prefixed with `JPC_` comes from the joltc_sys crate.
@@ -86,9 +85,9 @@ fn main() {
         let broad_phase_layer_interface = JPC_BroadPhaseLayerInterface_new(ptr::null(), BPL);
 
         let object_vs_broad_phase_layer_filter =
-            JPC_ObjectVsBroadPhaseLayerFilter_new(ptr::null_mut(), OVB);
+            JPC_ObjectVsBroadPhaseLayerFilter_new(ptr::null(), OVB);
 
-        let object_vs_object_layer_filter = JPC_ObjectLayerPairFilter_new(ptr::null_mut(), OVO);
+        let object_vs_object_layer_filter = JPC_ObjectLayerPairFilter_new(ptr::null(), OVO);
 
         let physics_system = JPC_PhysicsSystem_new();
 
@@ -114,26 +113,17 @@ fn main() {
         let body_interface = JPC_PhysicsSystem_GetBodyInterface(physics_system);
 
         let floor_shape_settings = JPC_BoxShapeSettings_new(vec3(100.0, 1.0, 100.0));
+        let floor_shape = create_shape(floor_shape_settings.cast()).unwrap();
 
-        let mut floor_shape: *mut JPC_Shape = ptr::null_mut();
-        let mut err: *mut JPC_String = ptr::null_mut();
-        if !JPC_ShapeSettings_Create(
-            floor_shape_settings.cast::<JPC_ShapeSettings>(),
-            &mut floor_shape,
-            &mut err,
-        ) {
-            panic!("Fatal error: {:?}", CStr::from_ptr(JPC_String_c_str(err)));
-        }
+        let floor_settings = JPC_BodyCreationSettings {
+            Position: rvec3(0.0, -1.0, 0.0),
+            MotionType: JPC_MOTION_TYPE_STATIC,
+            ObjectLayer: OL_NON_MOVING,
+            Shape: floor_shape,
+            ..Default::default()
+        };
 
-        let mut floor_settings = MaybeUninit::<JPC_BodyCreationSettings>::zeroed();
-        JPC_BodyCreationSettings_default(floor_settings.as_mut_ptr());
-        let mut floor_settings = floor_settings.assume_init();
-        floor_settings.Position = rvec3(0.0, -1.0, 0.0);
-        floor_settings.MotionType = JPC_MOTION_TYPE_STATIC;
-        floor_settings.ObjectLayer = OL_NON_MOVING;
-        floor_settings.Shape = floor_shape; // FIXME: Should be const
-
-        let floor = JPC_BodyInterface_CreateBody(body_interface, &mut floor_settings);
+        let floor = JPC_BodyInterface_CreateBody(body_interface, &floor_settings);
         JPC_BodyInterface_AddBody(
             body_interface,
             JPC_Body_GetID(floor),
@@ -141,32 +131,23 @@ fn main() {
         );
 
         let sphere_shape_settings = JPC_SphereShapeSettings_new(0.5);
+        let sphere_shape = create_shape(sphere_shape_settings.cast()).unwrap();
 
-        let mut sphere_shape: *mut JPC_Shape = ptr::null_mut();
-        let mut err: *mut JPC_String = ptr::null_mut();
-        if !JPC_ShapeSettings_Create(
-            sphere_shape_settings.cast::<JPC_ShapeSettings>(),
-            &mut sphere_shape,
-            &mut err,
-        ) {
-            panic!("Fatal error: {:?}", CStr::from_ptr(JPC_String_c_str(err)));
-        }
+        let sphere_settings = JPC_BodyCreationSettings {
+            Position: rvec3(0.0, 2.0, 0.0),
+            MotionType: JPC_MOTION_TYPE_DYNAMIC,
+            ObjectLayer: OL_MOVING,
+            Shape: sphere_shape,
+            ..Default::default()
+        };
 
-        let mut sphere_settings = MaybeUninit::<JPC_BodyCreationSettings>::zeroed();
-        JPC_BodyCreationSettings_default(sphere_settings.as_mut_ptr());
-        let mut sphere_settings = sphere_settings.assume_init();
-        sphere_settings.Position = rvec3(0.0, 2.0, 0.0);
-        sphere_settings.MotionType = JPC_MOTION_TYPE_DYNAMIC;
-        sphere_settings.ObjectLayer = OL_MOVING;
-        sphere_settings.Shape = sphere_shape; // FIXME: Should be const
-
-        let sphere = JPC_BodyInterface_CreateBody(body_interface, &mut sphere_settings);
+        let sphere = JPC_BodyInterface_CreateBody(body_interface, &sphere_settings);
         let sphere_id = JPC_Body_GetID(sphere);
         JPC_BodyInterface_AddBody(body_interface, sphere_id, JPC_ACTIVATION_ACTIVATE);
 
         JPC_BodyInterface_SetLinearVelocity(body_interface, sphere_id, vec3(0.0, -5.0, 0.0));
 
-        // TODO: PhysicsSystem::OptimizeBroadPhase
+        JPC_PhysicsSystem_OptimizeBroadPhase(physics_system);
 
         let delta_time = 1.0 / 60.0;
         let collision_steps = 1;
@@ -210,6 +191,17 @@ fn main() {
     }
 
     println!("Hello, world!");
+}
+
+unsafe fn create_shape(settings: *const JPC_ShapeSettings) -> Result<*mut JPC_Shape, CString> {
+    let mut shape: *mut JPC_Shape = ptr::null_mut();
+    let mut err: *mut JPC_String = ptr::null_mut();
+
+    if JPC_ShapeSettings_Create(settings, &mut shape, &mut err) {
+        Ok(shape)
+    } else {
+        Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+    }
 }
 
 #[test]
