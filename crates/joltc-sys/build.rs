@@ -35,6 +35,9 @@ fn build_joltc() {
         config.cxxflag("/EHsc");
     }
 
+    // Having IPO/LTO turned on breaks lld on Windows.
+    config.configure_arg("-DINTERPROCEDURAL_OPTIMIZATION=OFF");
+
     // These feature flags go through CMake and affect compilation of both Jolt
     // and JoltC.
     if cfg!(feature = "double-precision") {
