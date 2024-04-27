@@ -18,9 +18,9 @@ impl<'physics_system> BodyInterface<'physics_system> {
     }
 
     /// # Safety
-    /// nuh-uh
-    pub unsafe fn create_body(&self, mut settings: JPC_BodyCreationSettings) -> *mut JPC_Body {
-        JPC_BodyInterface_CreateBody(self.raw, &mut settings)
+    /// `settings` must be initialized and valid, with a valid `Shape` pointer.
+    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> *mut JPC_Body {
+        JPC_BodyInterface_CreateBody(self.raw, settings)
     }
 
     pub fn add_body(&self, body_id: BodyId, activation_mode: JPC_Activation) {

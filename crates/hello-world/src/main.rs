@@ -115,30 +115,26 @@ fn main() {
         let floor_shape_settings = JPC_BoxShapeSettings_new(vec3(100.0, 1.0, 100.0));
         let floor_shape = create_shape(floor_shape_settings.cast()).unwrap();
 
-        let floor_settings = JPC_BodyCreationSettings {
+        let floor = body_interface.create_body(&JPC_BodyCreationSettings {
             Position: rvec3(0.0, -1.0, 0.0),
             MotionType: JPC_MOTION_TYPE_STATIC,
             ObjectLayer: OL_NON_MOVING,
             Shape: floor_shape,
             ..Default::default()
-        };
-
-        let floor = body_interface.create_body(floor_settings);
+        });
         let floor_id = BodyId::new(JPC_Body_GetID(floor));
         body_interface.add_body(floor_id, JPC_ACTIVATION_DONT_ACTIVATE);
 
         let sphere_shape_settings = JPC_SphereShapeSettings_new(0.5);
         let sphere_shape = create_shape(sphere_shape_settings.cast()).unwrap();
 
-        let sphere_settings = JPC_BodyCreationSettings {
+        let sphere = body_interface.create_body(&JPC_BodyCreationSettings {
             Position: rvec3(0.0, 2.0, 0.0),
             MotionType: JPC_MOTION_TYPE_DYNAMIC,
             ObjectLayer: OL_MOVING,
             Shape: sphere_shape,
             ..Default::default()
-        };
-
-        let sphere = body_interface.create_body(sphere_settings);
+        });
         let sphere_id = BodyId::new(JPC_Body_GetID(sphere));
 
         body_interface.add_body(sphere_id, JPC_ACTIVATION_ACTIVATE);
