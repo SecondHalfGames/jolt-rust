@@ -26,8 +26,11 @@ impl SmokeTest for HelloShapes {
     unsafe fn setup(system: *mut JPC_PhysicsSystem) -> Self {
         let body_interface = JPC_PhysicsSystem_GetBodyInterface(system);
 
-        let floor_shape_settings = JPC_BoxShapeSettings_new(vec3(100.0, 1.0, 100.0));
-        let floor_shape = create_shape(floor_shape_settings.cast()).unwrap();
+        let floor_shape = create_box(&JPC_BoxShapeSettings {
+            HalfExtent: vec3(100.0, 1.0, 100.0),
+            ..Default::default()
+        })
+        .unwrap();
 
         let floor_settings = JPC_BodyCreationSettings {
             Position: rvec3(0.0, -1.0, 0.0),
@@ -41,8 +44,11 @@ impl SmokeTest for HelloShapes {
         let floor_id = JPC_Body_GetID(floor);
         JPC_BodyInterface_AddBody(body_interface, floor_id, JPC_ACTIVATION_DONT_ACTIVATE);
 
-        let sphere_shape_settings = JPC_SphereShapeSettings_new(0.5);
-        let sphere_shape = create_shape(sphere_shape_settings.cast()).unwrap();
+        let sphere_shape = create_sphere(&JPC_SphereShapeSettings {
+            Radius: 0.5,
+            ..Default::default()
+        })
+        .unwrap();
 
         let sphere_settings = JPC_BodyCreationSettings {
             Position: rvec3(0.0, 2.0, 0.0),

@@ -112,8 +112,11 @@ fn main() {
 
         let body_interface = JPC_PhysicsSystem_GetBodyInterface(physics_system);
 
-        let floor_shape_settings = JPC_BoxShapeSettings_new(vec3(100.0, 1.0, 100.0));
-        let floor_shape = create_shape(floor_shape_settings.cast()).unwrap();
+        let floor_shape = create_box(&JPC_BoxShapeSettings {
+            HalfExtent: vec3(100.0, 1.0, 100.0),
+            ..Default::default()
+        })
+        .unwrap();
 
         let floor_settings = JPC_BodyCreationSettings {
             Position: rvec3(0.0, -1.0, 0.0),
@@ -130,8 +133,11 @@ fn main() {
             JPC_ACTIVATION_DONT_ACTIVATE,
         );
 
-        let sphere_shape_settings = JPC_SphereShapeSettings_new(0.5);
-        let sphere_shape = create_shape(sphere_shape_settings.cast()).unwrap();
+        let sphere_shape = create_sphere(&JPC_SphereShapeSettings {
+            Radius: 0.5,
+            ..Default::default()
+        })
+        .unwrap();
 
         let sphere_settings = JPC_BodyCreationSettings {
             Position: rvec3(0.0, 2.0, 0.0),
@@ -193,14 +199,29 @@ fn main() {
     println!("Hello, world!");
 }
 
-unsafe fn create_shape(settings: *const JPC_ShapeSettings) -> Result<*mut JPC_Shape, CString> {
+fn create_box(settings: &JPC_BoxShapeSettings) -> Result<*mut JPC_Shape, CString> {
     let mut shape: *mut JPC_Shape = ptr::null_mut();
     let mut err: *mut JPC_String = ptr::null_mut();
 
-    if JPC_ShapeSettings_Create(settings, &mut shape, &mut err) {
-        Ok(shape)
-    } else {
-        Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+    unsafe {
+        if JPC_BoxShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
+    }
+}
+
+fn create_sphere(settings: &JPC_SphereShapeSettings) -> Result<*mut JPC_Shape, CString> {
+    let mut shape: *mut JPC_Shape = ptr::null_mut();
+    let mut err: *mut JPC_String = ptr::null_mut();
+
+    unsafe {
+        if JPC_SphereShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
     }
 }
 

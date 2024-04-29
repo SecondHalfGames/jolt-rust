@@ -22,14 +22,29 @@ pub trait SmokeTest {
     unsafe fn teardown(&mut self, system: *mut JPC_PhysicsSystem) {}
 }
 
-pub unsafe fn create_shape(settings: *const JPC_ShapeSettings) -> Result<*mut JPC_Shape, CString> {
+pub fn create_box(settings: &JPC_BoxShapeSettings) -> Result<*mut JPC_Shape, CString> {
     let mut shape: *mut JPC_Shape = ptr::null_mut();
     let mut err: *mut JPC_String = ptr::null_mut();
 
-    if JPC_ShapeSettings_Create(settings, &mut shape, &mut err) {
-        Ok(shape)
-    } else {
-        Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+    unsafe {
+        if JPC_BoxShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
+    }
+}
+
+pub fn create_sphere(settings: &JPC_SphereShapeSettings) -> Result<*mut JPC_Shape, CString> {
+    let mut shape: *mut JPC_Shape = ptr::null_mut();
+    let mut err: *mut JPC_String = ptr::null_mut();
+
+    unsafe {
+        if JPC_SphereShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
     }
 }
 
@@ -41,12 +56,22 @@ pub fn rvec3(x: Real, y: Real, z: Real) -> JPC_RVec3 {
     JPC_RVec3 { x, y, z, _w: z }
 }
 
-pub fn run_test<S: SmokeTest>() {
-    unsafe {
+fn global_init() {
+    use std::sync::OnceLock;
+
+    static INITIALIZED: OnceLock<()> = OnceLock::new();
+
+    INITIALIZED.get_or_init(|| unsafe {
         JPC_RegisterDefaultAllocator();
         JPC_FactoryInit();
         JPC_RegisterTypes();
+    });
+}
 
+pub fn run_test<S: SmokeTest>() {
+    global_init();
+
+    unsafe {
         let temp_allocator = JPC_TempAllocatorImpl_new(10 * 1024 * 1024);
 
         let job_system =
@@ -110,9 +135,6 @@ pub fn run_test<S: SmokeTest>() {
 
         JPC_JobSystemThreadPool_delete(job_system);
         JPC_TempAllocatorImpl_delete(temp_allocator);
-
-        JPC_UnregisterTypes();
-        JPC_FactoryDelete();
     }
 }
 

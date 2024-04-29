@@ -26,5 +26,12 @@ macro_rules! ffi_default {
 
 ffi_default! {
     JPC_BodyCreationSettings -> JPC_BodyCreationSettings_default,
-    JPC_BoxShapeSettings2 -> JPC_BoxShapeSettings2_default,
+
+    // All of the ShapeSettings types
+    JPC_TriangleShapeSettings -> JPC_TriangleShapeSettings_default,
+    JPC_BoxShapeSettings -> JPC_BoxShapeSettings_default,
+    JPC_SphereShapeSettings -> JPC_SphereShapeSettings_default,
+    JPC_CapsuleShapeSettings -> JPC_CapsuleShapeSettings_default,
+    JPC_CylinderShapeSettings -> JPC_CylinderShapeSettings_default,
+    JPC_ConvexHullShapeSettings -> JPC_ConvexHullShapeSettings_default,
 }

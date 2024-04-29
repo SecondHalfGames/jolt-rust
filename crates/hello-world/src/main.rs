@@ -7,7 +7,7 @@ use std::ptr;
 // Everything prefixed with `JPC_` comes from the joltc_sys crate.
 use joltc_sys::*;
 
-use rolt::{BodyId, BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, Vec3};
+use rolt::{BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, Vec3};
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
 const OL_MOVING: JPC_ObjectLayer = 1;
@@ -112,8 +112,11 @@ fn main() {
 
         let body_interface = physics_system.body_interface();
 
-        let floor_shape_settings = JPC_BoxShapeSettings_new(vec3(100.0, 1.0, 100.0));
-        let floor_shape = create_shape(floor_shape_settings.cast()).unwrap();
+        let floor_shape = create_box(&JPC_BoxShapeSettings {
+            HalfExtent: vec3(100.0, 1.0, 100.0),
+            ..Default::default()
+        })
+        .unwrap();
 
         let floor = body_interface.create_body(&JPC_BodyCreationSettings {
             Position: rvec3(0.0, -1.0, 0.0),
@@ -122,11 +125,14 @@ fn main() {
             Shape: floor_shape,
             ..Default::default()
         });
-        let floor_id = BodyId::new(JPC_Body_GetID(floor));
+        let floor_id = floor.id();
         body_interface.add_body(floor_id, JPC_ACTIVATION_DONT_ACTIVATE);
 
-        let sphere_shape_settings = JPC_SphereShapeSettings_new(0.5);
-        let sphere_shape = create_shape(sphere_shape_settings.cast()).unwrap();
+        let sphere_shape = create_sphere(&JPC_SphereShapeSettings {
+            Radius: 0.5,
+            ..Default::default()
+        })
+        .unwrap();
 
         let sphere = body_interface.create_body(&JPC_BodyCreationSettings {
             Position: rvec3(0.0, 2.0, 0.0),
@@ -135,7 +141,7 @@ fn main() {
             Shape: sphere_shape,
             ..Default::default()
         });
-        let sphere_id = BodyId::new(JPC_Body_GetID(sphere));
+        let sphere_id = sphere.id();
 
         body_interface.add_body(sphere_id, JPC_ACTIVATION_ACTIVATE);
         body_interface.set_linear_velocity(sphere_id, Vec3::new(0.0, -5.0, 0.0));
@@ -180,14 +186,29 @@ fn main() {
     println!("Hello, world!");
 }
 
-unsafe fn create_shape(settings: *const JPC_ShapeSettings) -> Result<*mut JPC_Shape, CString> {
+fn create_box(settings: &JPC_BoxShapeSettings) -> Result<*mut JPC_Shape, CString> {
     let mut shape: *mut JPC_Shape = ptr::null_mut();
     let mut err: *mut JPC_String = ptr::null_mut();
 
-    if JPC_ShapeSettings_Create(settings, &mut shape, &mut err) {
-        Ok(shape)
-    } else {
-        Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+    unsafe {
+        if JPC_BoxShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
+    }
+}
+
+fn create_sphere(settings: &JPC_SphereShapeSettings) -> Result<*mut JPC_Shape, CString> {
+    let mut shape: *mut JPC_Shape = ptr::null_mut();
+    let mut err: *mut JPC_String = ptr::null_mut();
+
+    unsafe {
+        if JPC_SphereShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
     }
 }
 

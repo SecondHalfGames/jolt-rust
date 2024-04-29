@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use joltc_sys::*;
 
-use crate::{BodyId, RVec3, Vec3};
+use crate::{Body, BodyId, RVec3, Vec3};
 
 pub struct BodyInterface<'physics_system> {
     raw: *mut JPC_BodyInterface,
@@ -19,8 +19,10 @@ impl<'physics_system> BodyInterface<'physics_system> {
 
     /// # Safety
     /// `settings` must be initialized and valid, with a valid `Shape` pointer.
-    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> *mut JPC_Body {
-        JPC_BodyInterface_CreateBody(self.raw, settings)
+    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> Body {
+        let raw = JPC_BodyInterface_CreateBody(self.raw, settings);
+
+        Body::<'physics_system>::new(raw)
     }
 
     pub fn add_body(&self, body_id: BodyId, activation_mode: JPC_Activation) {

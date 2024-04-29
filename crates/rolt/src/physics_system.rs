@@ -12,7 +12,8 @@ impl PhysicsSystem {
     }
 
     /// # Safety
-    /// not really
+    /// The interface arguments must be valid pointers with function pointers
+    /// initialized according to their contracts.
     pub unsafe fn init(
         &self,
         max_bodies: u32,
