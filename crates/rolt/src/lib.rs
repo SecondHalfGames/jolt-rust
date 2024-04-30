@@ -5,6 +5,7 @@ mod body_interface;
 mod interfaces;
 mod math;
 mod physics_system;
+mod reference;
 mod simple_types;
 
 pub use crate::body::*;
@@ -12,6 +13,7 @@ pub use crate::body_interface::*;
 pub use crate::interfaces::*;
 pub use crate::math::*;
 pub use crate::physics_system::*;
+pub use crate::reference::*;
 pub use crate::simple_types::*;
 
 pub fn register_default_allocator() {
