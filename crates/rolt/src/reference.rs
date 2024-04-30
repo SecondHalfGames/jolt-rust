@@ -2,9 +2,25 @@ use std::ops::Deref;
 
 /// Rust version of Jolt's [`RefTarget`](https://jrouwe.github.io/JoltPhysics/class_ref_target.html)
 /// CRTP.
-pub trait RefTarget {
-    fn add_ref(value: *const Self);
-    fn release(value: *const Self);
+///
+/// # Safety
+///
+/// The `value` pointers provided must be live. This trait should only be
+/// implemented for C++ types that inherit from `RefTarget<Self>`.
+#[allow(clippy::missing_safety_doc)]
+pub unsafe trait RefTarget {
+    unsafe fn add_ref(value: *const Self);
+    unsafe fn release(value: *const Self);
+}
+
+unsafe impl RefTarget for joltc_sys::JPC_Shape {
+    unsafe fn add_ref(value: *const Self) {
+        joltc_sys::JPC_Shape_AddRef(value);
+    }
+
+    unsafe fn release(value: *const Self) {
+        joltc_sys::JPC_Shape_Release(value);
+    }
 }
 
 /// Rust equivalent to Jolt's [`RefConst`](https://jrouwe.github.io/JoltPhysics/class_ref_const.html)
@@ -35,13 +51,18 @@ impl<T: RefTarget> Deref for Ref<T> {
 
 impl<T: RefTarget> Clone for Ref<T> {
     fn clone(&self) -> Self {
-        T::add_ref(self.ptr);
+        unsafe {
+            T::add_ref(self.ptr);
+        }
+
         Self { ptr: self.ptr }
     }
 }
 
 impl<T: RefTarget> Drop for Ref<T> {
     fn drop(&mut self) {
-        T::release(self.ptr)
+        unsafe {
+            T::release(self.ptr);
+        }
     }
 }
