@@ -25,3 +25,6 @@ cmake = "0.1.50"
 cc = { version = "1.0.94", features = ["parallel"] }
 walkdir = "2.5.0"
 anyhow = "1.0.69"
+
+[dev-dependencies]
+rand = "0.8.5"

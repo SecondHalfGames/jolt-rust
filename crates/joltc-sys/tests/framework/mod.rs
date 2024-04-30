@@ -48,6 +48,21 @@ pub fn create_sphere(settings: &JPC_SphereShapeSettings) -> Result<*mut JPC_Shap
     }
 }
 
+pub fn create_convex_hull(
+    settings: &JPC_ConvexHullShapeSettings,
+) -> Result<*mut JPC_Shape, CString> {
+    let mut shape: *mut JPC_Shape = ptr::null_mut();
+    let mut err: *mut JPC_String = ptr::null_mut();
+
+    unsafe {
+        if JPC_ConvexHullShapeSettings_Create(settings, &mut shape, &mut err) {
+            Ok(shape)
+        } else {
+            Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
+        }
+    }
+}
+
 pub fn vec3(x: f32, y: f32, z: f32) -> JPC_Vec3 {
     JPC_Vec3 { x, y, z, _w: z }
 }
