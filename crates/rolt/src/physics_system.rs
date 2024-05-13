@@ -2,36 +2,48 @@ use std::ptr;
 
 use joltc_sys::*;
 
-use crate::{BodyInterface, IntoBroadPhaseLayerInterface};
+use crate::{BodyInterface, BroadPhaseLayerInterfaceImpl};
 
-pub struct PhysicsSystem(*mut JPC_PhysicsSystem);
+pub struct PhysicsSystem {
+    raw: *mut JPC_PhysicsSystem,
+    broad_phase_layer_interface: Option<BroadPhaseLayerInterfaceImpl>,
+}
 
 impl PhysicsSystem {
     pub fn new() -> Self {
-        unsafe { Self(JPC_PhysicsSystem_new()) }
+        unsafe {
+            Self {
+                raw: JPC_PhysicsSystem_new(),
+                broad_phase_layer_interface: None,
+            }
+        }
     }
 
     /// # Safety
     /// The interface arguments must be valid pointers with function pointers
     /// initialized according to their contracts.
     pub unsafe fn init(
-        &self,
+        &mut self,
         max_bodies: u32,
         num_body_mutexes: u32,
         max_body_pairs: u32,
         max_contact_constraints: u32,
-        broad_phase_layer_interface: impl IntoBroadPhaseLayerInterface,
+        broad_phase_layer_interface: impl Into<BroadPhaseLayerInterfaceImpl>,
         object_vs_broad_phase_layer_interface: *mut JPC_ObjectVsBroadPhaseLayerFilter,
         object_layer_pair_filter: *mut JPC_ObjectLayerPairFilter,
     ) {
+        let bpli = broad_phase_layer_interface.into();
+        let bpli_raw = bpli.as_raw();
+        self.broad_phase_layer_interface = Some(bpli);
+
         unsafe {
             JPC_PhysicsSystem_Init(
-                self.0,
+                self.raw,
                 max_bodies,
                 num_body_mutexes,
                 max_body_pairs,
                 max_contact_constraints,
-                broad_phase_layer_interface.as_raw(),
+                bpli_raw,
                 object_vs_broad_phase_layer_interface,
                 object_layer_pair_filter,
             );
@@ -40,7 +52,7 @@ impl PhysicsSystem {
 
     pub fn optimize_broad_phase(&self) {
         unsafe {
-            JPC_PhysicsSystem_OptimizeBroadPhase(self.0);
+            JPC_PhysicsSystem_OptimizeBroadPhase(self.raw);
         }
     }
 
@@ -55,7 +67,7 @@ impl PhysicsSystem {
     ) {
         unsafe {
             JPC_PhysicsSystem_Update(
-                self.0,
+                self.raw,
                 delta_time,
                 collision_steps,
                 temp_allocator,
@@ -72,26 +84,26 @@ impl PhysicsSystem {
         renderer: *mut JPC_DebugRendererSimple,
     ) {
         unsafe {
-            JPC_PhysicsSystem_DrawBodies(self.0, settings, renderer, ptr::null());
+            JPC_PhysicsSystem_DrawBodies(self.raw, settings, renderer, ptr::null());
         }
     }
 
     pub fn body_interface(&self) -> BodyInterface<'_> {
         unsafe {
-            let raw = JPC_PhysicsSystem_GetBodyInterface(self.0);
+            let raw = JPC_PhysicsSystem_GetBodyInterface(self.raw);
             BodyInterface::new(raw)
         }
     }
 
     pub fn as_raw(&self) -> *mut JPC_PhysicsSystem {
-        self.0
+        self.raw
     }
 }
 
 impl Drop for PhysicsSystem {
     fn drop(&mut self) {
         unsafe {
-            JPC_PhysicsSystem_delete(self.0);
+            JPC_PhysicsSystem_delete(self.raw);
         }
     }
 }

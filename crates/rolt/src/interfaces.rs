@@ -4,10 +4,64 @@ use std::ptr;
 
 use joltc_sys::*;
 
+use crate::remote_drop::RemoteDrop;
 use crate::{BroadPhaseLayer, ObjectLayer};
 
-pub trait IntoBroadPhaseLayerInterface {
-    fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface;
+#[allow(dead_code)]
+pub struct BroadPhaseLayerInterfaceImpl {
+    raw: *mut JPC_BroadPhaseLayerInterface,
+    remote_this: Option<RemoteDrop>,
+}
+
+impl BroadPhaseLayerInterfaceImpl {
+    pub fn new<T: BroadPhaseLayerInterface + 'static>(value: T) -> Self {
+        type Bridge<T> = BroadPhaseLayerInterfaceBridge<T>;
+
+        let fns = JPC_BroadPhaseLayerInterfaceFns {
+            GetNumBroadPhaseLayers: Some(Bridge::<T>::GetNumBroadPhaseLayers as _),
+            GetBroadPhaseLayer: Some(Bridge::<T>::GetBroadPhaseLayer as _),
+        };
+
+        let this = Box::into_raw(Box::new(value));
+
+        let raw = unsafe { JPC_BroadPhaseLayerInterface_new(this.cast::<c_void>(), fns) };
+        let remote_this = unsafe { RemoteDrop::new(this) };
+
+        Self {
+            raw,
+            remote_this: Some(remote_this),
+        }
+    }
+
+    pub unsafe fn from_raw(this: *const c_void, fns: JPC_BroadPhaseLayerInterfaceFns) -> Self {
+        let raw = unsafe { JPC_BroadPhaseLayerInterface_new(this, fns) };
+
+        Self {
+            raw,
+            remote_this: None,
+        }
+    }
+
+    pub fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface {
+        self.raw
+    }
+}
+
+impl Drop for BroadPhaseLayerInterfaceImpl {
+    fn drop(&mut self) {
+        unsafe {
+            JPC_BroadPhaseLayerInterface_delete(self.raw);
+        }
+    }
+}
+
+impl<T> From<T> for BroadPhaseLayerInterfaceImpl
+where
+    T: BroadPhaseLayerInterface + 'static,
+{
+    fn from(value: T) -> Self {
+        Self::new(value)
+    }
 }
 
 pub trait BroadPhaseLayerInterface: Sized {
@@ -25,21 +79,6 @@ pub trait BroadPhaseLayerInterface: Sized {
         };
 
         unsafe { JPC_BroadPhaseLayerInterface_new(ptr::from_ref(self).cast::<c_void>(), fns) }
-    }
-}
-
-impl IntoBroadPhaseLayerInterface for *mut JPC_BroadPhaseLayerInterface {
-    fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface {
-        *self
-    }
-}
-
-impl<T> IntoBroadPhaseLayerInterface for T
-where
-    T: BroadPhaseLayerInterface,
-{
-    fn as_raw(&self) -> *mut JPC_BroadPhaseLayerInterface {
-        <Self as BroadPhaseLayerInterface>::as_raw(self)
     }
 }
 

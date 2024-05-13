@@ -90,7 +90,7 @@ fn main() {
 
         let object_vs_object_layer_filter = JPC_ObjectLayerPairFilter_new(ptr::null(), OVO);
 
-        let physics_system = rolt::PhysicsSystem::new();
+        let mut physics_system = rolt::PhysicsSystem::new();
 
         let max_bodies = 1024;
         let num_body_mutexes = 0;
