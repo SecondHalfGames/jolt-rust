@@ -7,7 +7,7 @@ use joltc_sys::*;
 use paste::paste;
 
 use crate::remote_drop::RemoteDrop;
-use crate::{Body, BodyId, BroadPhaseLayer, ObjectLayer};
+use crate::{Body, BodyId, BroadPhaseLayer, IntoJolt, ObjectLayer};
 
 macro_rules! define_impl_struct {
     (
@@ -69,6 +69,18 @@ macro_rules! define_impl_struct {
                 fn drop(&mut self) {
                     unsafe {
                         [<JPC_ $base_name _delete>](self.raw);
+                    }
+                }
+            }
+
+            impl<'a> IntoJolt for Option<&'a [<$base_name Impl>]> {
+                // FIXME: Should be const
+                type Jolt = *mut [<JPC_ $base_name>];
+
+                fn into_jolt(self) -> Self::Jolt {
+                    match self {
+                        Some(v) => v.as_raw(),
+                        None => std::ptr::null_mut(),
                     }
                 }
             }

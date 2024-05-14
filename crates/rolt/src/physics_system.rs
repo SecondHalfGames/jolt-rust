@@ -3,7 +3,7 @@ use std::ptr;
 use joltc_sys::*;
 
 use crate::{
-    BodyInterface, BroadPhaseLayerInterfaceImpl, ObjectLayerPairFilterImpl,
+    BodyInterface, BroadPhaseLayerInterfaceImpl, NarrowPhaseQuery, ObjectLayerPairFilterImpl,
     ObjectVsBroadPhaseLayerFilterImpl,
 };
 
@@ -26,10 +26,7 @@ impl PhysicsSystem {
         }
     }
 
-    /// # Safety
-    /// The interface arguments must be valid pointers with function pointers
-    /// initialized according to their contracts.
-    pub unsafe fn init(
+    pub fn init(
         &mut self,
         max_bodies: u32,
         num_body_mutexes: u32,
@@ -107,6 +104,13 @@ impl PhysicsSystem {
         unsafe {
             let raw = JPC_PhysicsSystem_GetBodyInterface(self.raw);
             BodyInterface::new(raw)
+        }
+    }
+
+    pub fn narrow_phase_query(&self) -> NarrowPhaseQuery<'_> {
+        unsafe {
+            let raw = JPC_PhysicsSystem_GetNarrowPhaseQuery(self.raw);
+            NarrowPhaseQuery::new(raw)
         }
     }
 

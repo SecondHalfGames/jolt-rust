@@ -16,6 +16,7 @@ mod body;
 mod body_interface;
 mod conversions;
 mod math;
+mod narrow_phase;
 mod physics_system;
 mod reference;
 mod remote_drop;
@@ -26,6 +27,7 @@ pub use crate::body::*;
 pub use crate::body_interface::*;
 pub use crate::conversions::*;
 pub use crate::math::*;
+pub use crate::narrow_phase::*;
 pub use crate::physics_system::*;
 pub use crate::reference::*;
 pub use crate::simple_types::*;
@@ -64,7 +66,7 @@ pub fn register_types() {
     }
 }
 
-/// [`JPH::UnregisterTypes](https://secondhalfgames.github.io/jolt-docs/5.0.0/_register_types_8h.html#a1e0db6031789e773039c7fc15ef47057)
+/// [`JPH::UnregisterTypes`](https://secondhalfgames.github.io/jolt-docs/5.0.0/_register_types_8h.html#a1e0db6031789e773039c7fc15ef47057)
 pub fn unregister_types() {
     unsafe {
         JPC_UnregisterTypes();
