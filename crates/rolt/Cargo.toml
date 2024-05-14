@@ -12,6 +12,7 @@ object-layer-u32 = ["joltc-sys/object-layer-u32"]
 
 [dependencies]
 joltc-sys = { version = "0.2.0", path = "../joltc-sys" }
+paste = "1.0.15"
 
 [lints.clippy]
 new_without_default = { level = "allow" }
