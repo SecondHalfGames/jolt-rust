@@ -7,7 +7,7 @@ use joltc_sys::*;
 use paste::paste;
 
 use crate::remote_drop::RemoteDrop;
-use crate::{BroadPhaseLayer, ObjectLayer};
+use crate::{Body, BodyId, BroadPhaseLayer, ObjectLayer};
 
 macro_rules! define_impl_struct {
     (
@@ -165,5 +165,78 @@ impl<T: ObjectLayerPairFilter> ObjectLayerPairFilterBridge<T> {
         let layer2 = ObjectLayer::new(layer2);
 
         this.should_collide(layer1, layer2)
+    }
+}
+
+/// See also: Jolt's [`BroadPhaseLayerFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_broad_phase_layer_filter.html) class.
+pub trait BroadPhaseLayerFilter {
+    fn should_collide(&self, layer: BroadPhaseLayer) -> bool;
+}
+
+define_impl_struct!(BroadPhaseLayerFilter { ShouldCollide });
+
+struct BroadPhaseLayerFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: BroadPhaseLayerFilter> BroadPhaseLayerFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(this: *const c_void, layer: JPC_BroadPhaseLayer) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+        let layer = BroadPhaseLayer::new(layer);
+
+        this.should_collide(layer)
+    }
+}
+
+/// See also: Jolt's [`ObjectLayerFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_object_layer_filter.html) class.
+pub trait ObjectLayerFilter {
+    fn should_collide(&self, layer: ObjectLayer) -> bool;
+}
+
+define_impl_struct!(ObjectLayerFilter { ShouldCollide });
+
+struct ObjectLayerFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ObjectLayerFilter> ObjectLayerFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(this: *const c_void, layer: JPC_ObjectLayer) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+        let layer = ObjectLayer::new(layer);
+
+        this.should_collide(layer)
+    }
+}
+
+/// See also: Jolt's [`BodyFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_body_filter.html) class.
+pub trait BodyFilter {
+    fn should_collide(&self, body_id: BodyId) -> bool;
+    fn should_collide_locked(&self, body: &mut Body) -> bool;
+}
+
+define_impl_struct!(BodyFilter {
+    ShouldCollide,
+    ShouldCollideLocked
+});
+
+struct BodyFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: BodyFilter> BodyFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(this: *const c_void, body_id: JPC_BodyID) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+        let body_id = BodyId::new(body_id);
+
+        this.should_collide(body_id)
+    }
+
+    unsafe extern "C" fn ShouldCollideLocked(this: *const c_void, body: *const JPC_Body) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+
+        // FIXME: cast_mut should not be required here
+        let mut body = Body::new(body.cast_mut());
+
+        this.should_collide_locked(&mut body)
     }
 }
