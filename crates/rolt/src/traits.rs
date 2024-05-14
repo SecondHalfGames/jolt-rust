@@ -17,7 +17,7 @@ macro_rules! define_impl_struct {
     ) => {
         paste! {
             #[allow(dead_code)]
-            #[doc = "Holds an implementation of the " $base_name " interface."]
+            #[doc = "Holds an implementation of the [" $base_name "] trait or the manual vtable equivalent."]
             pub struct [<$base_name Impl>] {
                 raw: *mut [<JPC_ $base_name >],
                 remote_this: Option<RemoteDrop>,
