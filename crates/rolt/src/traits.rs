@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use std::ffi::{c_uint, c_void};
 use std::marker::PhantomData;
 
@@ -10,7 +12,7 @@ use crate::{BroadPhaseLayer, ObjectLayer};
 macro_rules! define_impl_struct {
     (
         $base_name:ident {
-            $($method:ident,)*
+            $($method:ident),* $(,)?
         }
     ) => {
         paste! {
@@ -50,6 +52,13 @@ macro_rules! define_impl_struct {
                     }
                 }
 
+                pub unsafe fn new_existing(raw: *mut [<JPC_ $base_name>]) -> Self {
+                    Self {
+                        raw,
+                        remote_this: None,
+                    }
+                }
+
                 pub fn as_raw(&self) -> *mut [<JPC_ $base_name>] {
                     self.raw
                 }
@@ -71,7 +80,6 @@ macro_rules! define_impl_struct {
                     Self::new(value)
                 }
             }
-
         }
     };
 }
@@ -90,7 +98,6 @@ struct BroadPhaseLayerInterfaceBridge<T> {
     _phantom: PhantomData<T>,
 }
 
-#[allow(non_snake_case)]
 impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
     unsafe extern "C" fn GetNumBroadPhaseLayers(this: *const c_void) -> c_uint {
         let this = this.cast::<T>().as_ref().unwrap();
@@ -106,5 +113,53 @@ impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
         let layer = ObjectLayer::new(layer);
 
         this.get_broad_phase_layer(layer).raw()
+    }
+}
+
+pub trait ObjectVsBroadPhaseLayerFilter {
+    fn should_collide(&self, layer1: ObjectLayer, layer2: BroadPhaseLayer) -> bool;
+}
+
+define_impl_struct!(ObjectVsBroadPhaseLayerFilter { ShouldCollide });
+
+struct ObjectVsBroadPhaseLayerFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ObjectVsBroadPhaseLayerFilter> ObjectVsBroadPhaseLayerFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(
+        this: *const c_void,
+        layer1: JPC_ObjectLayer,
+        layer2: JPC_BroadPhaseLayer,
+    ) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+        let layer1 = ObjectLayer::new(layer1);
+        let layer2 = BroadPhaseLayer::new(layer2);
+
+        this.should_collide(layer1, layer2)
+    }
+}
+
+pub trait ObjectLayerPairFilter {
+    fn should_collide(&self, layer1: ObjectLayer, layer2: ObjectLayer) -> bool;
+}
+
+define_impl_struct!(ObjectLayerPairFilter { ShouldCollide });
+
+struct ObjectLayerPairFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ObjectLayerPairFilter> ObjectLayerPairFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(
+        this: *const c_void,
+        layer1: JPC_ObjectLayer,
+        layer2: JPC_ObjectLayer,
+    ) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+        let layer1 = ObjectLayer::new(layer1);
+        let layer2 = ObjectLayer::new(layer2);
+
+        this.should_collide(layer1, layer2)
     }
 }

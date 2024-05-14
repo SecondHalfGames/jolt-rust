@@ -2,11 +2,16 @@ use std::ptr;
 
 use joltc_sys::*;
 
-use crate::{BodyInterface, BroadPhaseLayerInterfaceImpl};
+use crate::{
+    BodyInterface, BroadPhaseLayerInterfaceImpl, ObjectLayerPairFilterImpl,
+    ObjectVsBroadPhaseLayerFilterImpl,
+};
 
 pub struct PhysicsSystem {
     raw: *mut JPC_PhysicsSystem,
     broad_phase_layer_interface: Option<BroadPhaseLayerInterfaceImpl>,
+    object_vs_broad_phase_layer_filter: Option<ObjectVsBroadPhaseLayerFilterImpl>,
+    object_layer_pair_filter: Option<ObjectLayerPairFilterImpl>,
 }
 
 impl PhysicsSystem {
@@ -15,6 +20,8 @@ impl PhysicsSystem {
             Self {
                 raw: JPC_PhysicsSystem_new(),
                 broad_phase_layer_interface: None,
+                object_vs_broad_phase_layer_filter: None,
+                object_layer_pair_filter: None,
             }
         }
     }
@@ -29,12 +36,20 @@ impl PhysicsSystem {
         max_body_pairs: u32,
         max_contact_constraints: u32,
         broad_phase_layer_interface: impl Into<BroadPhaseLayerInterfaceImpl>,
-        object_vs_broad_phase_layer_interface: *mut JPC_ObjectVsBroadPhaseLayerFilter,
-        object_layer_pair_filter: *mut JPC_ObjectLayerPairFilter,
+        object_vs_broad_phase_layer_filter: impl Into<ObjectVsBroadPhaseLayerFilterImpl>,
+        object_layer_pair_filter: impl Into<ObjectLayerPairFilterImpl>,
     ) {
         let bpli = broad_phase_layer_interface.into();
         let bpli_raw = bpli.as_raw();
         self.broad_phase_layer_interface = Some(bpli);
+
+        let ovbplf = object_vs_broad_phase_layer_filter.into();
+        let ovbplf_raw = ovbplf.as_raw();
+        self.object_vs_broad_phase_layer_filter = Some(ovbplf);
+
+        let olpf = object_layer_pair_filter.into();
+        let olpf_raw = olpf.as_raw();
+        self.object_layer_pair_filter = Some(olpf);
 
         unsafe {
             JPC_PhysicsSystem_Init(
@@ -44,8 +59,8 @@ impl PhysicsSystem {
                 max_body_pairs,
                 max_contact_constraints,
                 bpli_raw,
-                object_vs_broad_phase_layer_interface,
-                object_layer_pair_filter,
+                ovbplf_raw,
+                olpf_raw,
             );
         }
     }

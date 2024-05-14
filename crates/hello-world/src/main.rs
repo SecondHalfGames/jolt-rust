@@ -7,7 +7,10 @@ use std::ptr;
 // Everything prefixed with `JPC_` comes from the joltc_sys crate.
 use joltc_sys::*;
 
-use rolt::{BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, Vec3};
+use rolt::{
+    BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, ObjectLayerPairFilterImpl,
+    ObjectVsBroadPhaseLayerFilterImpl, Vec3,
+};
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
 const OL_MOVING: JPC_ObjectLayer = 1;
@@ -86,9 +89,9 @@ fn main() {
         let broad_phase_layer_interface = BroadPhaseLayers;
 
         let object_vs_broad_phase_layer_filter =
-            JPC_ObjectVsBroadPhaseLayerFilter_new(ptr::null(), OVB);
+            ObjectVsBroadPhaseLayerFilterImpl::from_raw(ptr::null(), OVB);
 
-        let object_vs_object_layer_filter = JPC_ObjectLayerPairFilter_new(ptr::null(), OVO);
+        let object_vs_object_layer_filter = ObjectLayerPairFilterImpl::from_raw(ptr::null(), OVO);
 
         let mut physics_system = rolt::PhysicsSystem::new();
 
@@ -172,9 +175,6 @@ fn main() {
         body_interface.destroy_body(sphere_id);
 
         drop(physics_system);
-
-        JPC_ObjectVsBroadPhaseLayerFilter_delete(object_vs_broad_phase_layer_filter);
-        JPC_ObjectLayerPairFilter_delete(object_vs_object_layer_filter);
 
         JPC_JobSystemThreadPool_delete(job_system);
         JPC_TempAllocatorImpl_delete(temp_allocator);
