@@ -43,6 +43,7 @@ pub struct RayCastArgs {
     pub body_filter: Option<BodyFilterImpl>,
 }
 
+/// The result of calling [`NarrowPhaseQuery::cast_ray`].
 #[derive(Debug, Clone, Copy)]
 pub struct RayCastResult {
     pub body_id: BodyId,

@@ -9,9 +9,15 @@ pub use glam::{DVec3, Mat4, Quat, Vec3, Vec4};
 
 use crate::{FromJolt, IntoJolt};
 
+/// Represents a world-space vector, which can use either `f32` or `f64`.
+///
+/// Because the `double-precision` feature is enabled, this uses `f64`.
 #[cfg(feature = "double-precision")]
 pub type RVec3 = DVec3;
 
+/// Represents a world-space vector, which can use either `f32` or `f64`.
+///
+/// Because the `double-precision` feature is NOT enabled, this uses `f32`.
 #[cfg(not(feature = "double-precision"))]
 pub type RVec3 = Vec3;
 
