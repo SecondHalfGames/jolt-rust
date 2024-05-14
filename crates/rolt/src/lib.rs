@@ -1,3 +1,15 @@
+//! Safe Rust wrapper around [Jolt Physics](github.com/jrouwe/JoltPhysics) using
+//! [JoltC](https://github.com/SecondHalfGames/JoltC).
+//!
+//! These bindings are best-effort and incomplete. The [joltc-sys][joltc_sys]
+//! crate contains the unsafe bindings that this crate uses and covers a lot
+//! more of Jolt's API.
+//!
+//! These bindings target Jolt Physics 5.0.0. You can view the C++ documentation
+//! for this version of Jolt Physics here:
+//!
+//! <https://secondhalfgames.github.io/jolt-docs/5.0.0/>
+
 use joltc_sys::*;
 
 mod body;
