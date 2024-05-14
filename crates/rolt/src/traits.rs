@@ -17,6 +17,7 @@ macro_rules! define_impl_struct {
     ) => {
         paste! {
             #[allow(dead_code)]
+            #[doc = "Holds an implementation of the " $base_name " interface."]
             pub struct [<$base_name Impl>] {
                 raw: *mut [<JPC_ $base_name >],
                 remote_this: Option<RemoteDrop>,
@@ -84,6 +85,7 @@ macro_rules! define_impl_struct {
     };
 }
 
+/// See also: Jolt's [`BroadPhaseLayerInterface`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_broad_phase_layer_interface.html) class.
 pub trait BroadPhaseLayerInterface {
     fn get_num_broad_phase_layers(&self) -> u32;
     fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
@@ -116,6 +118,7 @@ impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
     }
 }
 
+/// See also: Jolt's [`ObjectVsBroadPhaseLayerFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_object_vs_broad_phase_layer_filter.html) class.
 pub trait ObjectVsBroadPhaseLayerFilter {
     fn should_collide(&self, layer1: ObjectLayer, layer2: BroadPhaseLayer) -> bool;
 }
@@ -140,6 +143,7 @@ impl<T: ObjectVsBroadPhaseLayerFilter> ObjectVsBroadPhaseLayerFilterBridge<T> {
     }
 }
 
+/// See also: Jolt's [`ObjectLayerPairFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_object_layer_pair_filter.html) class.
 pub trait ObjectLayerPairFilter {
     fn should_collide(&self, layer1: ObjectLayer, layer2: ObjectLayer) -> bool;
 }

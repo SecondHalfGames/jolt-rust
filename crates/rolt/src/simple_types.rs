@@ -1,5 +1,6 @@
 use joltc_sys::*;
 
+/// Represents an object layer, which is internally either a u16 or a u32.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ObjectLayer(JPC_ObjectLayer);
 
@@ -13,6 +14,7 @@ impl ObjectLayer {
     }
 }
 
+/// Represents a broad phase layer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BroadPhaseLayer(JPC_BroadPhaseLayer);
 
@@ -26,6 +28,7 @@ impl BroadPhaseLayer {
     }
 }
 
+/// An ID that can be used to access a body using [`BodyInterface`][crate::BodyInterface].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BodyId(JPC_BodyID);
 
