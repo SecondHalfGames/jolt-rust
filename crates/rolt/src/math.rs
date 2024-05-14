@@ -1,6 +1,13 @@
-use joltc_sys::{JPC_Color, JPC_DVec3, JPC_Quat, JPC_Vec3};
+use joltc_sys::{JPC_Color, JPC_DVec3, JPC_Mat44, JPC_Quat, JPC_Vec3, JPC_Vec4};
 
+/// The type used for representing world space values.
+///
+/// Either `f32` (default) or `f64` (`double-precision` feature).
 pub use joltc_sys::Real;
+
+pub use glam::{DVec3, Mat4, Quat, Vec3, Vec4};
+
+use crate::{FromJolt, IntoJolt};
 
 #[cfg(feature = "double-precision")]
 pub type RVec3 = DVec3;
@@ -8,114 +15,119 @@ pub type RVec3 = DVec3;
 #[cfg(not(feature = "double-precision"))]
 pub type RVec3 = Vec3;
 
-#[repr(C, align(16))]
-pub struct Vec3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
+impl IntoJolt for Vec3 {
+    type Jolt = JPC_Vec3;
 
-impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z }
-    }
-}
-
-impl From<Vec3> for JPC_Vec3 {
-    fn from(value: Vec3) -> Self {
-        Self {
-            x: value.x,
-            y: value.y,
-            z: value.z,
-            _w: value.z,
+    fn into_jolt(self) -> Self::Jolt {
+        JPC_Vec3 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            _w: self.z,
         }
     }
 }
 
-impl From<JPC_Vec3> for Vec3 {
-    fn from(value: JPC_Vec3) -> Self {
-        Self {
-            x: value.x,
-            y: value.y,
-            z: value.z,
+impl FromJolt for Vec3 {
+    type Jolt = JPC_Vec3;
+
+    fn from_jolt(value: Self::Jolt) -> Self {
+        Vec3::new(value.x, value.y, value.z)
+    }
+}
+
+impl IntoJolt for Vec4 {
+    type Jolt = JPC_Vec4;
+
+    fn into_jolt(self) -> Self::Jolt {
+        JPC_Vec4 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            w: self.w,
         }
     }
 }
 
-#[repr(C, align(16))]
-pub struct DVec3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
+impl FromJolt for Vec4 {
+    type Jolt = JPC_Vec4;
 
-impl DVec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z }
+    fn from_jolt(value: Self::Jolt) -> Self {
+        Vec4::new(value.x, value.y, value.z, value.w)
     }
 }
 
-impl From<DVec3> for JPC_DVec3 {
-    fn from(value: DVec3) -> Self {
-        Self {
-            x: value.x,
-            y: value.y,
-            z: value.z,
-            _w: value.z,
+impl IntoJolt for DVec3 {
+    type Jolt = JPC_DVec3;
+
+    fn into_jolt(self) -> Self::Jolt {
+        JPC_DVec3 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            _w: self.z,
         }
     }
 }
 
-impl From<JPC_DVec3> for DVec3 {
-    fn from(value: JPC_DVec3) -> Self {
-        Self {
-            x: value.x,
-            y: value.y,
-            z: value.z,
+impl FromJolt for DVec3 {
+    type Jolt = JPC_DVec3;
+
+    fn from_jolt(value: Self::Jolt) -> Self {
+        DVec3::new(value.x, value.y, value.z)
+    }
+}
+
+impl IntoJolt for Quat {
+    type Jolt = JPC_Quat;
+
+    fn into_jolt(self) -> Self::Jolt {
+        JPC_Quat {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            w: self.w,
         }
     }
 }
 
-#[repr(C)]
-pub struct Quat {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub w: f32,
-}
+impl FromJolt for Quat {
+    type Jolt = JPC_Quat;
 
-impl Quat {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
-        Self { x, y, z, w }
-    }
-
-    pub fn identity() -> Self {
-        Self::new(0.0, 0.0, 0.0, 1.0)
+    fn from_jolt(value: Self::Jolt) -> Self {
+        Quat::from_xyzw(value.x, value.y, value.z, value.w)
     }
 }
 
-impl From<Quat> for JPC_Quat {
-    fn from(value: Quat) -> Self {
-        Self {
-            x: value.x,
-            y: value.y,
-            z: value.z,
-            w: value.w,
+impl IntoJolt for Mat4 {
+    type Jolt = JPC_Mat44;
+
+    fn into_jolt(self) -> Self::Jolt {
+        JPC_Mat44 {
+            matrix: [
+                self.x_axis.into_jolt(),
+                self.y_axis.into_jolt(),
+                self.z_axis.into_jolt(),
+                self.w_axis.into_jolt(),
+            ],
         }
     }
 }
 
-impl From<JPC_Quat> for Quat {
-    fn from(value: JPC_Quat) -> Self {
-        Self {
-            x: value.x,
-            y: value.y,
-            z: value.z,
-            w: value.w,
-        }
+impl FromJolt for Mat4 {
+    type Jolt = JPC_Mat44;
+
+    fn from_jolt(value: Self::Jolt) -> Self {
+        Mat4::from_cols(
+            Vec4::from_jolt(value.matrix[0]),
+            Vec4::from_jolt(value.matrix[1]),
+            Vec4::from_jolt(value.matrix[2]),
+            Vec4::from_jolt(value.matrix[3]),
+        )
     }
 }
 
+/// Represents an sRGB color with alpha.
 #[repr(C)]
 pub struct Color {
     pub r: u8,
@@ -130,19 +142,23 @@ impl Color {
     }
 }
 
-impl From<Color> for JPC_Color {
-    fn from(value: Color) -> Self {
-        Self {
-            r: value.r,
-            g: value.g,
-            b: value.b,
-            a: value.a,
+impl IntoJolt for Color {
+    type Jolt = JPC_Color;
+
+    fn into_jolt(self) -> Self::Jolt {
+        JPC_Color {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a: self.a,
         }
     }
 }
 
-impl From<JPC_Color> for Color {
-    fn from(value: JPC_Color) -> Self {
+impl FromJolt for Color {
+    type Jolt = JPC_Color;
+
+    fn from_jolt(value: Self::Jolt) -> Self {
         Self {
             r: value.r,
             g: value.g,

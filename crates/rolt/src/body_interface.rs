@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use joltc_sys::*;
 
-use crate::{Body, BodyId, RVec3, Vec3};
+use crate::{Body, BodyId, IntoJolt, IntoRolt, RVec3, Vec3};
 
 /// See also: Jolt's [`BodyInterface`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_body_interface.html) class.
 pub struct BodyInterface<'physics_system> {
@@ -45,16 +45,16 @@ impl<'physics_system> BodyInterface<'physics_system> {
     }
 
     pub fn center_of_mass_position(&self, body_id: BodyId) -> RVec3 {
-        unsafe { JPC_BodyInterface_GetCenterOfMassPosition(self.raw, body_id.raw()).into() }
+        unsafe { JPC_BodyInterface_GetCenterOfMassPosition(self.raw, body_id.raw()).into_rolt() }
     }
 
     pub fn linear_velocity(&self, body_id: BodyId) -> Vec3 {
-        unsafe { JPC_BodyInterface_GetLinearVelocity(self.raw, body_id.raw()).into() }
+        unsafe { JPC_BodyInterface_GetLinearVelocity(self.raw, body_id.raw()).into_rolt() }
     }
 
     pub fn set_linear_velocity(&self, body_id: BodyId, velocity: Vec3) {
         unsafe {
-            JPC_BodyInterface_SetLinearVelocity(self.raw, body_id.raw(), velocity.into());
+            JPC_BodyInterface_SetLinearVelocity(self.raw, body_id.raw(), velocity.into_jolt());
         }
     }
 

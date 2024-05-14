@@ -14,6 +14,7 @@ use joltc_sys::*;
 
 mod body;
 mod body_interface;
+mod conversions;
 mod math;
 mod physics_system;
 mod reference;
@@ -23,6 +24,7 @@ mod traits;
 
 pub use crate::body::*;
 pub use crate::body_interface::*;
+pub use crate::conversions::*;
 pub use crate::math::*;
 pub use crate::physics_system::*;
 pub use crate::reference::*;
