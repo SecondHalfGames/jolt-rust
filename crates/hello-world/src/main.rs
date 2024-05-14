@@ -1,15 +1,15 @@
 // someday:
 // #![forbid(unsafe_code)]
 
-use std::ffi::{c_void, CStr, CString};
+use std::ffi::{CStr, CString};
 use std::ptr;
 
 // Everything prefixed with `JPC_` comes from the joltc_sys crate.
 use joltc_sys::*;
 
 use rolt::{
-    BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, ObjectLayerPairFilterImpl,
-    ObjectVsBroadPhaseLayerFilterImpl, Vec3,
+    BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, ObjectLayerPairFilter,
+    ObjectVsBroadPhaseLayerFilter, Vec3,
 };
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
@@ -35,37 +35,29 @@ impl BroadPhaseLayerInterface for BroadPhaseLayers {
     }
 }
 
-unsafe extern "C" fn ovb_should_collide(
-    _this: *const c_void,
-    layer1: JPC_ObjectLayer,
-    layer2: JPC_BroadPhaseLayer,
-) -> bool {
-    match layer1 {
-        OL_NON_MOVING => layer2 == BPL_MOVING,
-        OL_MOVING => true,
-        _ => unreachable!(),
+struct ObjectVsBroadPhase;
+
+impl ObjectVsBroadPhaseLayerFilter for ObjectVsBroadPhase {
+    fn should_collide(&self, layer1: ObjectLayer, layer2: BroadPhaseLayer) -> bool {
+        match layer1.raw() {
+            OL_NON_MOVING => layer2.raw() == BPL_MOVING,
+            OL_MOVING => true,
+            _ => unreachable!(),
+        }
     }
 }
 
-const OVB: JPC_ObjectVsBroadPhaseLayerFilterFns = JPC_ObjectVsBroadPhaseLayerFilterFns {
-    ShouldCollide: Some(ovb_should_collide as _),
-};
+struct ObjectLayerPair;
 
-unsafe extern "C" fn ovo_should_collide(
-    _this: *const c_void,
-    layer1: JPC_ObjectLayer,
-    layer2: JPC_ObjectLayer,
-) -> bool {
-    match layer1 {
-        OL_NON_MOVING => layer2 == OL_MOVING,
-        OL_MOVING => true,
-        _ => unreachable!(),
+impl ObjectLayerPairFilter for ObjectLayerPair {
+    fn should_collide(&self, layer1: ObjectLayer, layer2: ObjectLayer) -> bool {
+        match layer1.raw() {
+            OL_NON_MOVING => layer2.raw() == OL_MOVING,
+            OL_MOVING => true,
+            _ => unreachable!(),
+        }
     }
 }
-
-const OVO: JPC_ObjectLayerPairFilterFns = JPC_ObjectLayerPairFilterFns {
-    ShouldCollide: Some(ovo_should_collide as _),
-};
 
 fn vec3(x: f32, y: f32, z: f32) -> JPC_Vec3 {
     JPC_Vec3 { x, y, z, _w: z }
@@ -87,11 +79,8 @@ fn main() {
             JPC_JobSystemThreadPool_new2(JPC_MAX_PHYSICS_JOBS as _, JPC_MAX_PHYSICS_BARRIERS as _);
 
         let broad_phase_layer_interface = BroadPhaseLayers;
-
-        let object_vs_broad_phase_layer_filter =
-            ObjectVsBroadPhaseLayerFilterImpl::from_raw(ptr::null(), OVB);
-
-        let object_vs_object_layer_filter = ObjectLayerPairFilterImpl::from_raw(ptr::null(), OVO);
+        let object_vs_broad_phase_layer_filter = ObjectVsBroadPhase;
+        let object_layer_pair_filter = ObjectLayerPair;
 
         let mut physics_system = rolt::PhysicsSystem::new();
 
@@ -107,7 +96,7 @@ fn main() {
             max_contact_constraints,
             broad_phase_layer_interface,
             object_vs_broad_phase_layer_filter,
-            object_vs_object_layer_filter,
+            object_layer_pair_filter,
         );
 
         // TODO: register body activation listener
