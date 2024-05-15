@@ -1,6 +1,7 @@
 mod framework;
 
 use std::f32::consts::{PI, TAU};
+use std::mem;
 
 use joltc_sys::*;
 use rand::Rng;
@@ -179,4 +180,67 @@ impl SmokeTest for HelloConvexHull {
 #[test]
 fn hello_convex_hull() {
     run_test::<HelloConvexHull>();
+}
+
+struct NarrowPhaseRayCast {
+    sphere: JPC_BodyID,
+}
+
+impl SmokeTest for NarrowPhaseRayCast {
+    unsafe fn setup(system: *mut JPC_PhysicsSystem) -> Self {
+        let body_interface = JPC_PhysicsSystem_GetBodyInterface(system);
+
+        let sphere_shape = create_sphere(&JPC_SphereShapeSettings {
+            Radius: 0.5,
+            ..Default::default()
+        })
+        .unwrap();
+
+        let sphere_settings = JPC_BodyCreationSettings {
+            Position: rvec3(0.0, 2.0, 0.0),
+            MotionType: JPC_MOTION_TYPE_DYNAMIC,
+            ObjectLayer: OL_MOVING,
+            Shape: sphere_shape,
+            ..Default::default()
+        };
+
+        let sphere = JPC_BodyInterface_CreateBody(body_interface, &sphere_settings);
+        let sphere_id = JPC_Body_GetID(sphere);
+        JPC_BodyInterface_AddBody(body_interface, sphere_id, JPC_ACTIVATION_ACTIVATE);
+
+        let query = JPC_PhysicsSystem_GetNarrowPhaseQuery(system);
+
+        let mut args = JPC_NarrowPhaseQuery_CastRayArgs {
+            Ray: JPC_RRayCast {
+                Origin: vec3(1.0, 2.0, 0.0),
+                Direction: vec3(-2.0, 0.0, 0.0),
+            },
+            ..mem::zeroed()
+        };
+        let hit = JPC_NarrowPhaseQuery_CastRay(query, &mut args);
+
+        assert!(hit, "ray should hit the sphere");
+        assert!(
+            (args.Result.Fraction - 0.25).abs() < 0.01,
+            "ray should hit at around 0.25 fraction"
+        );
+
+        Self { sphere: sphere_id }
+    }
+
+    unsafe fn post_update(&mut self, _system: *mut JPC_PhysicsSystem) -> bool {
+        false
+    }
+
+    unsafe fn teardown(&mut self, system: *mut JPC_PhysicsSystem) {
+        let body_interface = JPC_PhysicsSystem_GetBodyInterface(system);
+
+        JPC_BodyInterface_RemoveBody(body_interface, self.sphere);
+        JPC_BodyInterface_DestroyBody(body_interface, self.sphere);
+    }
+}
+
+#[test]
+fn narrow_phase_ray_cast() {
+    run_test::<NarrowPhaseRayCast>();
 }
