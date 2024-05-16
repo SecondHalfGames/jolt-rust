@@ -212,7 +212,7 @@ impl SmokeTest for NarrowPhaseRayCast {
 
         let mut args = JPC_NarrowPhaseQuery_CastRayArgs {
             Ray: JPC_RRayCast {
-                Origin: vec3(1.0, 2.0, 0.0),
+                Origin: rvec3(1.0, 2.0, 0.0),
                 Direction: vec3(-2.0, 0.0, 0.0),
             },
             ..mem::zeroed()
