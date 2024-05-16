@@ -8,7 +8,7 @@
 //! These bindings target Jolt Physics 5.0.0. You can view the C++ documentation
 //! for this version of Jolt Physics here:
 //!
-//! <https://secondhalfgames.github.io/jolt-docs/5.0.0/>
+//! <https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/>
 
 use joltc_sys::*;
 
@@ -33,7 +33,7 @@ pub use crate::reference::*;
 pub use crate::simple_types::*;
 pub use crate::traits::*;
 
-/// [`JPH::RegisterDefaultAllocator`](https://secondhalfgames.github.io/jolt-docs/5.0.0/_memory_8h.html#a6ae804b1b68490f6e032ef6e7d9fc93e)
+/// [`JPH::RegisterDefaultAllocator`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/_memory_8h.html#a6ae804b1b68490f6e032ef6e7d9fc93e)
 pub fn register_default_allocator() {
     unsafe {
         JPC_RegisterDefaultAllocator();
@@ -43,7 +43,7 @@ pub fn register_default_allocator() {
 /// Creates a new global factory. Required for initialization and used by Jolt's
 /// serialization.
 ///
-/// See also: Jolt's [`Factory`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_factory.html) class.
+/// See also: Jolt's [`Factory`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_factory.html) class.
 pub fn factory_init() {
     unsafe {
         JPC_FactoryInit();
@@ -52,21 +52,21 @@ pub fn factory_init() {
 
 /// Deletes the globally registered factory.
 ///
-/// See also: Jolt's [`Factory`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_factory.html) class.
+/// See also: Jolt's [`Factory`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_factory.html) class.
 pub fn factory_delete() {
     unsafe {
         JPC_FactoryDelete();
     }
 }
 
-/// [`JPH::RegisterTypes`](https://secondhalfgames.github.io/jolt-docs/5.0.0/_register_types_8h.html#a033e662bc8b7d5a8acd9adcc692b7cb4)
+/// [`JPH::RegisterTypes`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/_register_types_8h.html#a033e662bc8b7d5a8acd9adcc692b7cb4)
 pub fn register_types() {
     unsafe {
         JPC_RegisterTypes();
     }
 }
 
-/// [`JPH::UnregisterTypes`](https://secondhalfgames.github.io/jolt-docs/5.0.0/_register_types_8h.html#a1e0db6031789e773039c7fc15ef47057)
+/// [`JPH::UnregisterTypes`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/_register_types_8h.html#a1e0db6031789e773039c7fc15ef47057)
 pub fn unregister_types() {
     unsafe {
         JPC_UnregisterTypes();

@@ -97,7 +97,7 @@ macro_rules! define_impl_struct {
     };
 }
 
-/// See also: Jolt's [`BroadPhaseLayerInterface`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_broad_phase_layer_interface.html) class.
+/// See also: Jolt's [`BroadPhaseLayerInterface`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_broad_phase_layer_interface.html) class.
 pub trait BroadPhaseLayerInterface {
     fn get_num_broad_phase_layers(&self) -> u32;
     fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
@@ -130,7 +130,7 @@ impl<T: BroadPhaseLayerInterface> BroadPhaseLayerInterfaceBridge<T> {
     }
 }
 
-/// See also: Jolt's [`ObjectVsBroadPhaseLayerFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_object_vs_broad_phase_layer_filter.html) class.
+/// See also: Jolt's [`ObjectVsBroadPhaseLayerFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_object_vs_broad_phase_layer_filter.html) class.
 pub trait ObjectVsBroadPhaseLayerFilter {
     fn should_collide(&self, layer1: ObjectLayer, layer2: BroadPhaseLayer) -> bool;
 }
@@ -155,7 +155,7 @@ impl<T: ObjectVsBroadPhaseLayerFilter> ObjectVsBroadPhaseLayerFilterBridge<T> {
     }
 }
 
-/// See also: Jolt's [`ObjectLayerPairFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_object_layer_pair_filter.html) class.
+/// See also: Jolt's [`ObjectLayerPairFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_object_layer_pair_filter.html) class.
 pub trait ObjectLayerPairFilter {
     fn should_collide(&self, layer1: ObjectLayer, layer2: ObjectLayer) -> bool;
 }
@@ -180,7 +180,7 @@ impl<T: ObjectLayerPairFilter> ObjectLayerPairFilterBridge<T> {
     }
 }
 
-/// See also: Jolt's [`BroadPhaseLayerFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_broad_phase_layer_filter.html) class.
+/// See also: Jolt's [`BroadPhaseLayerFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_broad_phase_layer_filter.html) class.
 pub trait BroadPhaseLayerFilter {
     fn should_collide(&self, layer: BroadPhaseLayer) -> bool;
 }
@@ -200,7 +200,7 @@ impl<T: BroadPhaseLayerFilter> BroadPhaseLayerFilterBridge<T> {
     }
 }
 
-/// See also: Jolt's [`ObjectLayerFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_object_layer_filter.html) class.
+/// See also: Jolt's [`ObjectLayerFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_object_layer_filter.html) class.
 pub trait ObjectLayerFilter {
     fn should_collide(&self, layer: ObjectLayer) -> bool;
 }
@@ -220,7 +220,7 @@ impl<T: ObjectLayerFilter> ObjectLayerFilterBridge<T> {
     }
 }
 
-/// See also: Jolt's [`BodyFilter`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_body_filter.html) class.
+/// See also: Jolt's [`BodyFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_body_filter.html) class.
 pub trait BodyFilter {
     fn should_collide(&self, body_id: BodyId) -> bool;
     fn should_collide_locked(&self, body: &mut Body) -> bool;

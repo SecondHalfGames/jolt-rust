@@ -4,7 +4,7 @@ use joltc_sys::*;
 
 use crate::{Body, BodyId, IntoJolt, IntoRolt, RVec3, Vec3};
 
-/// See also: Jolt's [`BodyInterface`](https://secondhalfgames.github.io/jolt-docs/5.0.0/class_body_interface.html) class.
+/// See also: Jolt's [`BodyInterface`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_body_interface.html) class.
 pub struct BodyInterface<'physics_system> {
     raw: *mut JPC_BodyInterface,
     _phantom: PhantomData<&'physics_system ()>,
