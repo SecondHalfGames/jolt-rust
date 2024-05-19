@@ -1,5 +1,11 @@
 # Jolt-Rust Changelog
 
+## [v0.3.1](https://github.com/SecondHalfGames/jolt-rust/compare/rolt-v0.3.0..rolt-v0.3.1)
+
+### joltc-sys and rolt
+- Added "Requirements" section to README that lists build requirements
+- Removed `Cargo.toml` line because I forgot to update it and would probably forget to update it a lot more in the future.
+
 ## [v0.3.0](https://github.com/SecondHalfGames/jolt-rust/compare/rolt-v0.2.0..rolt-v0.3.0)
 
 ### joltc-sys

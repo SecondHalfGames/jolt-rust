@@ -3,12 +3,12 @@ This crate contains a higher-level wrapper around JoltC, providing ergonomics co
 
 The safety of this crate is currently provided on a best-effort basis.
 
-```toml
-rolt = "0.2.0"
-```
-
 For more complete and unsafe bindings, see [joltc-sys](https://crates.io/crates/joltc-sys).
 
-Features:
+## Build Requirements
+- CMake 3.16 or newer
+- `libclang`, see the [bindgen guide](https://rust-lang.github.io/rust-bindgen/requirements.html) for installation steps.
+
+## Features
 - `double-precision`: Forwards to `joltc-sys/double-precision`
 - `object-layer-u32`: Forwards to `joltc-sys/object-layer-u32`
