@@ -174,7 +174,7 @@ dependencies = [
 
 [[package]]
 name = "joltc-sys"
-version = "0.3.0+Jolt-5.0.0"
+version = "0.3.1+Jolt-5.0.0"
 dependencies = [
  "anyhow",
  "bindgen",
@@ -353,7 +353,7 @@ checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
 
 [[package]]
 name = "rolt"
-version = "0.3.0+Jolt-5.0.0"
+version = "0.3.1+Jolt-5.0.0"
 dependencies = [
  "glam",
  "joltc-sys",
