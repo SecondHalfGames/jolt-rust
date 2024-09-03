@@ -58,6 +58,12 @@ fn build_joltc() {
     dst.push("lib");
 
     println!("cargo:rustc-link-search=native={}", dst.display());
+
+    // On macOS, we need to explicitly link against the C++ standard library
+    // here to avoid getting missing symbol errors from Jolt/JoltC.
+    if cfg!(target_os = "macos") {
+        println!("cargo:rustc-flags=-l dylib=c++");
+    }
 }
 
 fn link() {
