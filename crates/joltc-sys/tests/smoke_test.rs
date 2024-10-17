@@ -281,10 +281,8 @@ impl SmokeTest for NarrowPhaseShapeCast {
                 Direction: vec3(1.0, 0.0, 0.0),
                 ..mem::zeroed()
             },
-            // Ray: JPC_RShapeCast {
-            //     Origin: rvec3(1.0, 2.0, 0.0),
-            //     Direction: vec3(-2.0, 0.0, 0.0),
-            // },
+            Settings: Default::default(),
+            BaseOffset: vec3(0.0, 0.0, 0.0),
             ..mem::zeroed()
         };
         JPC_NarrowPhaseQuery_CastShape(query, &mut args);
