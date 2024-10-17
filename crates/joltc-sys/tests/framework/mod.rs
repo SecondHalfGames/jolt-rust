@@ -86,6 +86,13 @@ pub fn rmat44_identity() -> JPC_RMat44 {
     }
 }
 
+pub fn rmat44_translation(col3: JPC_RVec3) -> JPC_RMat44 {
+    JPC_RMat44 {
+        col3,
+        ..rmat44_identity()
+    }
+}
+
 fn global_init() {
     use std::sync::OnceLock;
 

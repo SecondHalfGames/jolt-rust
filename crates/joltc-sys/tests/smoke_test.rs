@@ -277,17 +277,17 @@ impl SmokeTest for NarrowPhaseShapeCast {
             ShapeCast: JPC_RShapeCast {
                 Shape: sphere_shape,
                 Scale: vec3(1.0, 1.0, 1.0),
-                CenterOfMassStart: rmat44_identity(),
-                Direction: vec3(1.0, 0.0, 0.0),
+                CenterOfMassStart: rmat44_translation(rvec3(-5.0, 2.0, 0.0)),
+                Direction: vec3(10.0, 0.0, 0.0),
                 ..mem::zeroed()
             },
             Settings: Default::default(),
             BaseOffset: vec3(0.0, 0.0, 0.0),
             ..mem::zeroed()
         };
-        JPC_NarrowPhaseQuery_CastShape(query, &mut args);
+        let hit = JPC_NarrowPhaseQuery_CastShapeEasiest(query, &mut args);
 
-        // assert!(hit, "ray should hit the sphere");
+        assert!(hit, "sphere should hit the other sphere");
         // assert!(
         //     (args.Result.Fraction - 0.25).abs() < 0.01,
         //     "ray should hit at around 0.25 fraction"
