@@ -244,3 +244,73 @@ impl SmokeTest for NarrowPhaseRayCast {
 fn narrow_phase_ray_cast() {
     run_test::<NarrowPhaseRayCast>();
 }
+
+struct NarrowPhaseShapeCast {
+    sphere: JPC_BodyID,
+}
+
+impl SmokeTest for NarrowPhaseShapeCast {
+    unsafe fn setup(system: *mut JPC_PhysicsSystem) -> Self {
+        let body_interface = JPC_PhysicsSystem_GetBodyInterface(system);
+
+        let sphere_shape = create_sphere(&JPC_SphereShapeSettings {
+            Radius: 0.5,
+            ..Default::default()
+        })
+        .unwrap();
+
+        let sphere_settings = JPC_BodyCreationSettings {
+            Position: rvec3(0.0, 2.0, 0.0),
+            MotionType: JPC_MOTION_TYPE_DYNAMIC,
+            ObjectLayer: OL_MOVING,
+            Shape: sphere_shape,
+            ..Default::default()
+        };
+
+        let sphere = JPC_BodyInterface_CreateBody(body_interface, &sphere_settings);
+        let sphere_id = JPC_Body_GetID(sphere);
+        JPC_BodyInterface_AddBody(body_interface, sphere_id, JPC_ACTIVATION_ACTIVATE);
+
+        let query = JPC_PhysicsSystem_GetNarrowPhaseQuery(system);
+
+        let mut args = JPC_NarrowPhaseQuery_CastShapeArgs {
+            ShapeCast: JPC_RShapeCast {
+                Shape: sphere_shape,
+                Scale: vec3(1.0, 1.0, 1.0),
+                CenterOfMassStart: rmat44_identity(),
+                Direction: vec3(1.0, 0.0, 0.0),
+                ..mem::zeroed()
+            },
+            // Ray: JPC_RShapeCast {
+            //     Origin: rvec3(1.0, 2.0, 0.0),
+            //     Direction: vec3(-2.0, 0.0, 0.0),
+            // },
+            ..mem::zeroed()
+        };
+        JPC_NarrowPhaseQuery_CastShape(query, &mut args);
+
+        // assert!(hit, "ray should hit the sphere");
+        // assert!(
+        //     (args.Result.Fraction - 0.25).abs() < 0.01,
+        //     "ray should hit at around 0.25 fraction"
+        // );
+
+        Self { sphere: sphere_id }
+    }
+
+    unsafe fn post_update(&mut self, _system: *mut JPC_PhysicsSystem) -> bool {
+        false
+    }
+
+    unsafe fn teardown(&mut self, system: *mut JPC_PhysicsSystem) {
+        let body_interface = JPC_PhysicsSystem_GetBodyInterface(system);
+
+        JPC_BodyInterface_RemoveBody(body_interface, self.sphere);
+        JPC_BodyInterface_DestroyBody(body_interface, self.sphere);
+    }
+}
+
+#[test]
+fn narrow_phase_shape_cast() {
+    run_test::<NarrowPhaseShapeCast>();
+}

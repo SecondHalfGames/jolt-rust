@@ -71,6 +71,21 @@ pub fn rvec3(x: Real, y: Real, z: Real) -> JPC_RVec3 {
     JPC_RVec3 { x, y, z, _w: z }
 }
 
+pub fn vec4(x: f32, y: f32, z: f32, w: f32) -> JPC_Vec4 {
+    JPC_Vec4 { x, y, z, w }
+}
+
+pub fn rmat44_identity() -> JPC_RMat44 {
+    JPC_RMat44 {
+        col: [
+            vec4(1.0, 0.0, 0.0, 0.0),
+            vec4(0.0, 1.0, 0.0, 0.0),
+            vec4(0.0, 0.0, 1.0, 0.0),
+        ],
+        col3: rvec3(0.0, 0.0, 0.0),
+    }
+}
+
 fn global_init() {
     use std::sync::OnceLock;
 

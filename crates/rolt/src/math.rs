@@ -110,12 +110,12 @@ impl IntoJolt for Mat4 {
 
     fn into_jolt(self) -> Self::Jolt {
         JPC_Mat44 {
-            matrix: [
+            col: [
                 self.x_axis.into_jolt(),
                 self.y_axis.into_jolt(),
                 self.z_axis.into_jolt(),
-                self.w_axis.into_jolt(),
             ],
+            col3: self.w_axis.truncate().into_jolt(),
         }
     }
 }
@@ -125,10 +125,10 @@ impl FromJolt for Mat4 {
 
     fn from_jolt(value: Self::Jolt) -> Self {
         Mat4::from_cols(
-            Vec4::from_jolt(value.matrix[0]),
-            Vec4::from_jolt(value.matrix[1]),
-            Vec4::from_jolt(value.matrix[2]),
-            Vec4::from_jolt(value.matrix[3]),
+            Vec4::from_jolt(value.col[0]),
+            Vec4::from_jolt(value.col[1]),
+            Vec4::from_jolt(value.col[2]),
+            Vec3::from_jolt(value.col3).extend(1.0),
         )
     }
 }
