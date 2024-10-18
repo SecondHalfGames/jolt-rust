@@ -52,6 +52,8 @@ fn build_joltc() {
 
     let mut dst = config.build();
 
+    println!("cargo:rustc-link-search=native={}", dst.display());
+
     // Jolt and JoltC put libraries in the 'lib' subfolder. This goes against
     // the docs of the cmake crate, but it's possible that it's just mishandling
     // an output path and not account for the install target's configurability.
