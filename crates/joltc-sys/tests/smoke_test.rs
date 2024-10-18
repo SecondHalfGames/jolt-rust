@@ -282,7 +282,7 @@ impl SmokeTest for NarrowPhaseShapeCast {
                 ..mem::zeroed()
             },
             Settings: Default::default(),
-            BaseOffset: vec3(0.0, 0.0, 0.0),
+            BaseOffset: rvec3(0.0, 0.0, 0.0),
             ..mem::zeroed()
         };
         let hit = JPC_NarrowPhaseQuery_CastShapeEasiest(query, &mut args);
