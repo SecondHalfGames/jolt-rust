@@ -9,7 +9,7 @@ use crate::{
 
 /// The root of everything for a physics simulation.
 ///
-/// See also: Jolt's [`PhysicsSystem`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_physics_system.html) class.
+/// See also: Jolt's [`PhysicsSystem`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_physics_system.html) class.
 pub struct PhysicsSystem {
     raw: *mut JPC_PhysicsSystem,
     broad_phase_layer_interface: Option<BroadPhaseLayerInterfaceImpl>,

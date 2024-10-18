@@ -8,13 +8,13 @@ use crate::{
     RVec3, Vec3,
 };
 
-/// See also: Jolt's [`NarrowPhaseQuery`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_narrow_phase_query.html) class.
+/// See also: Jolt's [`NarrowPhaseQuery`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_narrow_phase_query.html) class.
 pub struct NarrowPhaseQuery<'physics_system> {
     raw: *const JPC_NarrowPhaseQuery,
     _phantom: PhantomData<&'physics_system ()>,
 }
 
-/// See also: Jolt's [`RRayCast`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/struct_r_ray_cast.html) class.
+/// See also: Jolt's [`RRayCast`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/struct_r_ray_cast.html) class.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct RRayCast {
     /// Origin of the ray.

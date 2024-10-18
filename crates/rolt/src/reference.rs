@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-/// Rust version of Jolt's [`RefTarget`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_ref_target.html)
+/// Rust version of Jolt's [`RefTarget`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_ref_target.html)
 /// CRTP.
 ///
 /// # Safety
@@ -23,7 +23,7 @@ unsafe impl RefTarget for joltc_sys::JPC_Shape {
     }
 }
 
-/// Rust equivalent to Jolt's [`RefConst`](https://jrouwe.github.io/JoltPhysicsDocs/5.0.0/class_ref_const.html)
+/// Rust equivalent to Jolt's [`RefConst`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_ref_const.html)
 pub struct Ref<T: RefTarget> {
     ptr: *const T,
 }
