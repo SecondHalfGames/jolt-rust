@@ -285,9 +285,33 @@ impl SmokeTest for NarrowPhaseShapeCast {
             (*this).result = None;
         }
 
-        unsafe extern "C" fn add_hit(this: *mut c_void, result: *const JPC_ShapeCastResult) {
+        fn shape_cast_result_early_out_fraction(result: &JPC_ShapeCastResult) -> f32 {
+            if result.Fraction > 0.0 {
+                result.Fraction
+            } else {
+                -result.PenetrationDepth
+            }
+        }
+
+        unsafe extern "C" fn add_hit(
+            this: *mut c_void,
+            base: *mut JPC_CastShapeCollector,
+            result: *const JPC_ShapeCastResult,
+        ) {
             let this = this.cast::<CollectorState>();
-            (*this).result = Some(*result);
+
+            let early_out = shape_cast_result_early_out_fraction(&*result);
+
+            let set = (*this)
+                .result
+                .map(|old| early_out < shape_cast_result_early_out_fraction(&old))
+                .unwrap_or(true);
+
+            if set {
+                JPC_CastShapeCollector_UpdateEarlyOutFraction(base, early_out);
+
+                (*this).result = Some(*result);
+            }
         }
 
         let collector_fns = JPC_CastShapeCollectorFns {

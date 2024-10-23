@@ -4,8 +4,8 @@ use std::mem;
 use joltc_sys::*;
 
 use crate::{
-    BodyFilterImpl, BodyId, BroadPhaseLayerFilterImpl, FromJolt, IntoJolt, ObjectLayerFilterImpl,
-    RVec3, Vec3,
+    BodyFilterImpl, BodyId, BroadPhaseLayerFilterImpl, CastShapeBase, CastShapeCollector, FromJolt,
+    IntoJolt, ObjectLayerFilterImpl, RVec3, Vec3,
 };
 
 /// See also: Jolt's [`NarrowPhaseQuery`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_narrow_phase_query.html) class.
@@ -59,6 +59,38 @@ impl FromJolt for RayCastResult {
             body_id: BodyId::new(value.BodyID),
             fraction: value.Fraction,
             sub_shape_id: value.SubShapeID2,
+        }
+    }
+}
+
+pub struct ClosestHitCastShapeCollector {
+    pub result: Option<JPC_ShapeCastResult>,
+}
+
+impl CastShapeCollector for ClosestHitCastShapeCollector {
+    fn reset(&mut self) {
+        self.result = None;
+    }
+
+    fn add_hit(&mut self, base: &mut CastShapeBase, result: &JPC_ShapeCastResult) {
+        fn early_out_fraction(result: &JPC_ShapeCastResult) -> f32 {
+            if result.Fraction > 0.0 {
+                result.Fraction
+            } else {
+                -result.PenetrationDepth
+            }
+        }
+
+        let early_out = early_out_fraction(result);
+
+        let set = self
+            .result
+            .map(|old| early_out < early_out_fraction(&old))
+            .unwrap_or(true);
+
+        if set {
+            base.update_early_out_fraction(early_out);
+            self.result = Some(*result);
         }
     }
 }

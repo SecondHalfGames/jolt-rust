@@ -11,6 +11,7 @@ use crate::{Body, BodyId, BroadPhaseLayer, IntoJolt, ObjectLayer};
 
 macro_rules! define_impl_struct {
     (
+        $mutability:ident
         $base_name:ident {
             $($method:ident),* $(,)?
         }
@@ -44,7 +45,7 @@ macro_rules! define_impl_struct {
                     }
                 }
 
-                pub unsafe fn from_raw(this: *const c_void, fns: [<JPC_ $base_name Fns>]) -> Self {
+                pub unsafe fn from_raw(this: *$mutability c_void, fns: [<JPC_ $base_name Fns>]) -> Self {
                     let raw = unsafe { [<JPC_ $base_name _new>](this, fns) };
 
                     Self {
@@ -103,7 +104,7 @@ pub trait BroadPhaseLayerInterface {
     fn get_broad_phase_layer(&self, layer: ObjectLayer) -> BroadPhaseLayer;
 }
 
-define_impl_struct!(BroadPhaseLayerInterface {
+define_impl_struct!(const BroadPhaseLayerInterface {
     GetNumBroadPhaseLayers,
     GetBroadPhaseLayer,
 });
@@ -135,7 +136,7 @@ pub trait ObjectVsBroadPhaseLayerFilter {
     fn should_collide(&self, layer1: ObjectLayer, layer2: BroadPhaseLayer) -> bool;
 }
 
-define_impl_struct!(ObjectVsBroadPhaseLayerFilter { ShouldCollide });
+define_impl_struct!(const ObjectVsBroadPhaseLayerFilter { ShouldCollide });
 
 struct ObjectVsBroadPhaseLayerFilterBridge<T> {
     _phantom: PhantomData<T>,
@@ -160,7 +161,7 @@ pub trait ObjectLayerPairFilter {
     fn should_collide(&self, layer1: ObjectLayer, layer2: ObjectLayer) -> bool;
 }
 
-define_impl_struct!(ObjectLayerPairFilter { ShouldCollide });
+define_impl_struct!(const ObjectLayerPairFilter { ShouldCollide });
 
 struct ObjectLayerPairFilterBridge<T> {
     _phantom: PhantomData<T>,
@@ -185,7 +186,7 @@ pub trait BroadPhaseLayerFilter {
     fn should_collide(&self, layer: BroadPhaseLayer) -> bool;
 }
 
-define_impl_struct!(BroadPhaseLayerFilter { ShouldCollide });
+define_impl_struct!(const BroadPhaseLayerFilter { ShouldCollide });
 
 struct BroadPhaseLayerFilterBridge<T> {
     _phantom: PhantomData<T>,
@@ -205,7 +206,7 @@ pub trait ObjectLayerFilter {
     fn should_collide(&self, layer: ObjectLayer) -> bool;
 }
 
-define_impl_struct!(ObjectLayerFilter { ShouldCollide });
+define_impl_struct!(const ObjectLayerFilter { ShouldCollide });
 
 struct ObjectLayerFilterBridge<T> {
     _phantom: PhantomData<T>,
@@ -226,7 +227,7 @@ pub trait BodyFilter {
     fn should_collide_locked(&self, body: &mut Body) -> bool;
 }
 
-define_impl_struct!(BodyFilter {
+define_impl_struct!(const BodyFilter {
     ShouldCollide,
     ShouldCollideLocked
 });
@@ -250,5 +251,48 @@ impl<T: BodyFilter> BodyFilterBridge<T> {
         let mut body = Body::new(body.cast_mut());
 
         this.should_collide_locked(&mut body)
+    }
+}
+
+pub trait CastShapeCollector {
+    fn reset(&mut self);
+    fn add_hit(&mut self, base: &mut CastShapeBase, result: &JPC_ShapeCastResult);
+}
+
+pub struct CastShapeBase {
+    base: *mut JPC_CastShapeCollector,
+}
+
+impl CastShapeBase {
+    pub fn update_early_out_fraction(&mut self, fraction: f32) {
+        unsafe {
+            JPC_CastShapeCollector_UpdateEarlyOutFraction(self.base, fraction);
+        }
+    }
+}
+
+define_impl_struct!(mut CastShapeCollector { Reset, AddHit });
+
+struct CastShapeCollectorBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: CastShapeCollector> CastShapeCollectorBridge<T> {
+    unsafe extern "C" fn AddHit(
+        this: *mut c_void,
+        base: *mut JPC_CastShapeCollector,
+        result: *const JPC_ShapeCastResult,
+    ) {
+        let this = this.cast::<T>().as_mut().unwrap();
+        let mut base = CastShapeBase { base };
+        let result = &*result;
+
+        this.add_hit(&mut base, result);
+    }
+
+    unsafe extern "C" fn Reset(this: *mut c_void) {
+        let this = this.cast::<T>().as_mut().unwrap();
+
+        this.reset();
     }
 }
