@@ -1,7 +1,9 @@
 mod framework;
 
 use std::f32::consts::{PI, TAU};
+use std::ffi::c_void;
 use std::mem;
+use std::ptr::addr_of_mut;
 
 use joltc_sys::*;
 use rand::Rng;
@@ -273,25 +275,57 @@ impl SmokeTest for NarrowPhaseShapeCast {
 
         let query = JPC_PhysicsSystem_GetNarrowPhaseQuery(system);
 
+        #[derive(Default)]
+        struct CollectorState {
+            result: Option<JPC_ShapeCastResult>,
+        }
+
+        unsafe extern "C" fn reset(this: *mut c_void) {
+            let this = this.cast::<CollectorState>();
+            (*this).result = None;
+        }
+
+        unsafe extern "C" fn add_hit(this: *mut c_void, result: *const JPC_ShapeCastResult) {
+            let this = this.cast::<CollectorState>();
+            (*this).result = Some(*result);
+        }
+
+        let collector_fns = JPC_CastShapeCollectorFns {
+            Reset: Some(reset as _),
+            AddHit: Some(add_hit as _),
+        };
+
+        let mut collector_state = CollectorState::default();
+        let collector = JPC_CastShapeCollector_new(
+            addr_of_mut!(collector_state).cast::<c_void>(),
+            collector_fns,
+        );
+
         let mut args = JPC_NarrowPhaseQuery_CastShapeArgs {
             ShapeCast: JPC_RShapeCast {
                 Shape: sphere_shape,
                 Scale: vec3(1.0, 1.0, 1.0),
                 CenterOfMassStart: rmat44_translation(rvec3(-5.0, 2.0, 0.0)),
-                Direction: vec3(10.0, 0.0, 0.0),
+                Direction: vec3(5.0, 0.0, 0.0),
                 ..mem::zeroed()
             },
             Settings: Default::default(),
             BaseOffset: rvec3(0.0, 0.0, 0.0),
+            Collector: collector,
             ..mem::zeroed()
         };
-        let hit = JPC_NarrowPhaseQuery_CastShapeEasiest(query, &mut args);
+        JPC_NarrowPhaseQuery_CastShape(query, &mut args);
 
-        assert!(hit, "sphere should hit the other sphere");
-        // assert!(
-        //     (args.Result.Fraction - 0.25).abs() < 0.01,
-        //     "ray should hit at around 0.25 fraction"
-        // );
+        JPC_CastShapeCollector_delete(collector);
+
+        let result = collector_state
+            .result
+            .expect("sphere should hit the other sphere");
+
+        assert!(
+            (result.Fraction - 0.8).abs() < 0.01,
+            "ray should hit at around 0.8 fraction"
+        );
 
         Self { sphere: sphere_id }
     }
