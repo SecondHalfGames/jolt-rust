@@ -4,8 +4,8 @@ use std::mem;
 use joltc_sys::*;
 
 use crate::{
-    BodyFilterImpl, BodyId, BroadPhaseLayerFilterImpl, CastShapeBase, CastShapeCollector, FromJolt,
-    IntoJolt, ObjectLayerFilterImpl, RVec3, Vec3,
+    BodyFilterImpl, BodyId, BroadPhaseLayerFilterImpl, CastShapeBase, CastShapeCollector,
+    CastShapeCollectorImpl, FromJolt, IntoJolt, ObjectLayerFilterImpl, RVec3, Vec3,
 };
 
 /// See also: Jolt's [`NarrowPhaseQuery`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_narrow_phase_query.html) class.
@@ -38,9 +38,9 @@ impl RRayCast {
 #[derive(Default)]
 pub struct RayCastArgs {
     pub ray: RRayCast,
-    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl>,
-    pub object_layer_filter: Option<ObjectLayerFilterImpl>,
-    pub body_filter: Option<BodyFilterImpl>,
+    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'static>>,
+    pub object_layer_filter: Option<ObjectLayerFilterImpl<'static>>,
+    pub body_filter: Option<BodyFilterImpl<'static>>,
 }
 
 /// The result of calling [`NarrowPhaseQuery::cast_ray`].
@@ -63,8 +63,35 @@ impl FromJolt for RayCastResult {
     }
 }
 
+pub struct RShapeCast {
+    pub shape: *const JPC_Shape,
+    pub scale: Vec3,
+    pub center_of_mass_start: JPC_RMat44,
+    pub direction: Vec3,
+    // const JPC_AABox ShapeWorldBounds;
+}
+
+pub struct CastShapeArgs<'a> {
+    pub shapecast: RShapeCast,
+    pub base_offset: RVec3,
+    pub settings: JPC_ShapeCastSettings,
+    pub collector: Option<CastShapeCollectorImpl<'a>>,
+    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'static>>,
+    pub object_layer_filter: Option<ObjectLayerFilterImpl<'static>>,
+    pub body_filter: Option<BodyFilterImpl<'static>>,
+    // const JPC_ShapeFilter *ShapeFilter;
+}
+
+#[non_exhaustive]
+#[derive(Default)]
 pub struct ClosestHitCastShapeCollector {
     pub result: Option<JPC_ShapeCastResult>,
+}
+
+impl ClosestHitCastShapeCollector {
+    pub fn new() -> Self {
+        Self { result: None }
+    }
 }
 
 impl CastShapeCollector for ClosestHitCastShapeCollector {
@@ -119,6 +146,28 @@ impl<'physics_system> NarrowPhaseQuery<'physics_system> {
         } else {
             None
         }
+    }
+
+    pub unsafe fn cast_shape(&self, args: CastShapeArgs<'_>) {
+        let mut raw_args = JPC_NarrowPhaseQuery_CastShapeArgs {
+            ShapeCast: JPC_RShapeCast {
+                Shape: args.shapecast.shape,
+                Scale: args.shapecast.scale.into_jolt(),
+                CenterOfMassStart: args.shapecast.center_of_mass_start,
+                Direction: args.shapecast.direction.into_jolt(),
+                // const JPC_AABox ShapeWorldBounds;
+                ..mem::zeroed()
+            },
+            Settings: args.settings,
+            BaseOffset: args.base_offset.into_jolt(),
+            Collector: args.collector.as_ref().into_jolt(),
+            BroadPhaseLayerFilter: args.broad_phase_layer_filter.as_ref().into_jolt(),
+            ObjectLayerFilter: args.object_layer_filter.as_ref().into_jolt(),
+            BodyFilter: args.body_filter.as_ref().into_jolt(),
+            // const JPC_ShapeFilter *ShapeFilter;
+        };
+
+        JPC_NarrowPhaseQuery_CastShape(self.raw, &mut raw_args);
     }
 
     pub fn as_raw(&self) -> *const JPC_NarrowPhaseQuery {

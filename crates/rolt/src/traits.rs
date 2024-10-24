@@ -19,12 +19,13 @@ macro_rules! define_impl_struct {
         paste! {
             #[allow(dead_code)]
             #[doc = "Holds an implementation of the [" $base_name "] trait or the manual vtable equivalent."]
-            pub struct [<$base_name Impl>] {
+            pub struct [<$base_name Impl>]<'a> {
                 raw: *mut [<JPC_ $base_name >],
                 remote_this: Option<RemoteDrop>,
+                _marker: PhantomData<&'a ()>,
             }
 
-            impl [<$base_name Impl>] {
+            impl [<$base_name Impl>]<'static> {
                 pub fn new<T: $base_name + 'static>(value: T) -> Self {
                     type Bridge<T> = [< $base_name Bridge >]<T>;
 
@@ -42,6 +43,7 @@ macro_rules! define_impl_struct {
                     Self {
                         raw,
                         remote_this: Some(remote_this),
+                        _marker: PhantomData,
                     }
                 }
 
@@ -51,6 +53,7 @@ macro_rules! define_impl_struct {
                     Self {
                         raw,
                         remote_this: None,
+                        _marker: PhantomData,
                     }
                 }
 
@@ -58,6 +61,28 @@ macro_rules! define_impl_struct {
                     Self {
                         raw,
                         remote_this: None,
+                        _marker: PhantomData,
+                    }
+                }
+            }
+
+            impl<'a> [<$base_name Impl>]<'a> {
+                pub fn new_borrowed<T: $base_name + 'a>(value: &'a mut T) -> Self {
+                    type Bridge<T> = [< $base_name Bridge >]<T>;
+
+                    let fns = [<JPC_ $base_name Fns>] {
+                        $(
+                            $method: Some(Bridge::<T>::$method as _),
+                        )*
+                    };
+
+                    let this = std::ptr::from_mut(value);
+                    let raw = unsafe { [<JPC_ $base_name _new>](this.cast::<c_void>(), fns) };
+
+                    Self {
+                        raw,
+                        remote_this: None,
+                        _marker: PhantomData,
                     }
                 }
 
@@ -66,7 +91,7 @@ macro_rules! define_impl_struct {
                 }
             }
 
-            impl Drop for [<$base_name Impl>] {
+            impl<'a> Drop for [<$base_name Impl>]<'a> {
                 fn drop(&mut self) {
                     unsafe {
                         [<JPC_ $base_name _delete>](self.raw);
@@ -74,7 +99,7 @@ macro_rules! define_impl_struct {
                 }
             }
 
-            impl<'a> IntoJolt for Option<&'a [<$base_name Impl>]> {
+            impl<'a> IntoJolt for Option<&'a [<$base_name Impl>]<'a>> {
                 // FIXME: Should be const
                 type Jolt = *mut [<JPC_ $base_name>];
 
@@ -86,7 +111,7 @@ macro_rules! define_impl_struct {
                 }
             }
 
-            impl<T> From<T> for [<$base_name Impl>]
+            impl<T> From<T> for [<$base_name Impl>]<'static>
             where
                 T: $base_name + 'static,
             {

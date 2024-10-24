@@ -8,8 +8,9 @@ use std::ptr;
 use joltc_sys::*;
 
 use rolt::{
-    BroadPhaseLayer, BroadPhaseLayerInterface, ObjectLayer, ObjectLayerPairFilter,
-    ObjectVsBroadPhaseLayerFilter, Vec3,
+    BroadPhaseLayer, BroadPhaseLayerInterface, CastShapeArgs, CastShapeCollectorImpl,
+    ClosestHitCastShapeCollector, IntoJolt, IntoRolt, ObjectLayer, ObjectLayerPairFilter,
+    ObjectVsBroadPhaseLayerFilter, RShapeCast, Vec3,
 };
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
@@ -57,14 +58,6 @@ impl ObjectLayerPairFilter for ObjectLayerPair {
             _ => unreachable!(),
         }
     }
-}
-
-fn vec3(x: f32, y: f32, z: f32) -> JPC_Vec3 {
-    JPC_Vec3 { x, y, z, _w: z }
-}
-
-fn rvec3(x: Real, y: Real, z: Real) -> JPC_RVec3 {
-    JPC_RVec3 { x, y, z, _w: z }
 }
 
 fn main() {
@@ -157,6 +150,27 @@ fn main() {
             physics_system.update(delta_time, collision_steps, temp_allocator, job_system);
         }
 
+        // TEMPORARY: test out safe shapecasting API
+        let narrow_phase = physics_system.narrow_phase_query();
+
+        let mut collector = ClosestHitCastShapeCollector::new();
+        narrow_phase.cast_shape(CastShapeArgs {
+            shapecast: RShapeCast {
+                shape: sphere_shape,
+                scale: Vec3::ONE,
+                center_of_mass_start: rmat44_translation(Vec3::new(-5.0, 0.0, 0.0).into_jolt()),
+                direction: Vec3::new(10.0, 0.0, 0.0),
+            },
+            base_offset: Vec3::ZERO,
+            settings: Default::default(),
+            collector: Some(CastShapeCollectorImpl::new_borrowed(&mut collector)),
+            broad_phase_layer_filter: None,
+            object_layer_filter: None,
+            body_filter: None,
+        });
+
+        println!("Hit: {}", collector.result.is_some());
+
         body_interface.remove_body(floor_id);
         body_interface.destroy_body(floor_id);
 
@@ -198,6 +212,41 @@ fn create_sphere(settings: &JPC_SphereShapeSettings) -> Result<*mut JPC_Shape, C
         } else {
             Err(CStr::from_ptr(JPC_String_c_str(err)).to_owned())
         }
+    }
+}
+
+fn vec3(x: f32, y: f32, z: f32) -> JPC_Vec3 {
+    JPC_Vec3 { x, y, z, _w: z }
+}
+
+fn rvec3(x: Real, y: Real, z: Real) -> JPC_RVec3 {
+    JPC_RVec3 { x, y, z, _w: z }
+}
+
+fn vec4(x: f32, y: f32, z: f32, w: f32) -> JPC_Vec4 {
+    JPC_Vec4 { x, y, z, w }
+}
+
+// If 'double-precision' is set, there is padding in this struct
+#[allow(clippy::needless_update)]
+fn rmat44_identity() -> JPC_RMat44 {
+    unsafe {
+        JPC_RMat44 {
+            col: [
+                vec4(1.0, 0.0, 0.0, 0.0),
+                vec4(0.0, 1.0, 0.0, 0.0),
+                vec4(0.0, 0.0, 1.0, 0.0),
+            ],
+            col3: rvec3(0.0, 0.0, 0.0),
+            ..std::mem::zeroed()
+        }
+    }
+}
+
+fn rmat44_translation(col3: JPC_RVec3) -> JPC_RMat44 {
+    JPC_RMat44 {
+        col3,
+        ..rmat44_identity()
     }
 }
 

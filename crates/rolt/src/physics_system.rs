@@ -12,9 +12,9 @@ use crate::{
 /// See also: Jolt's [`PhysicsSystem`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_physics_system.html) class.
 pub struct PhysicsSystem {
     raw: *mut JPC_PhysicsSystem,
-    broad_phase_layer_interface: Option<BroadPhaseLayerInterfaceImpl>,
-    object_vs_broad_phase_layer_filter: Option<ObjectVsBroadPhaseLayerFilterImpl>,
-    object_layer_pair_filter: Option<ObjectLayerPairFilterImpl>,
+    broad_phase_layer_interface: Option<BroadPhaseLayerInterfaceImpl<'static>>,
+    object_vs_broad_phase_layer_filter: Option<ObjectVsBroadPhaseLayerFilterImpl<'static>>,
+    object_layer_pair_filter: Option<ObjectLayerPairFilterImpl<'static>>,
 }
 
 impl PhysicsSystem {
@@ -35,9 +35,9 @@ impl PhysicsSystem {
         num_body_mutexes: u32,
         max_body_pairs: u32,
         max_contact_constraints: u32,
-        broad_phase_layer_interface: impl Into<BroadPhaseLayerInterfaceImpl>,
-        object_vs_broad_phase_layer_filter: impl Into<ObjectVsBroadPhaseLayerFilterImpl>,
-        object_layer_pair_filter: impl Into<ObjectLayerPairFilterImpl>,
+        broad_phase_layer_interface: impl Into<BroadPhaseLayerInterfaceImpl<'static>>,
+        object_vs_broad_phase_layer_filter: impl Into<ObjectVsBroadPhaseLayerFilterImpl<'static>>,
+        object_layer_pair_filter: impl Into<ObjectLayerPairFilterImpl<'static>>,
     ) {
         let bpli = broad_phase_layer_interface.into();
         let bpli_raw = bpli.as_raw();
