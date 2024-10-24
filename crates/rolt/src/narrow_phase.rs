@@ -165,6 +165,7 @@ impl<'physics_system> NarrowPhaseQuery<'physics_system> {
             ObjectLayerFilter: args.object_layer_filter.as_ref().into_jolt(),
             BodyFilter: args.body_filter.as_ref().into_jolt(),
             // const JPC_ShapeFilter *ShapeFilter;
+            ..mem::zeroed()
         };
 
         JPC_NarrowPhaseQuery_CastShape(self.raw, &mut raw_args);

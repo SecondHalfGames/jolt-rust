@@ -9,8 +9,8 @@ use joltc_sys::*;
 
 use rolt::{
     BroadPhaseLayer, BroadPhaseLayerInterface, CastShapeArgs, CastShapeCollectorImpl,
-    ClosestHitCastShapeCollector, IntoJolt, IntoRolt, ObjectLayer, ObjectLayerPairFilter,
-    ObjectVsBroadPhaseLayerFilter, RShapeCast, Vec3,
+    ClosestHitCastShapeCollector, IntoJolt, ObjectLayer, ObjectLayerPairFilter,
+    ObjectVsBroadPhaseLayerFilter, RShapeCast, RVec3, Vec3,
 };
 
 const OL_NON_MOVING: JPC_ObjectLayer = 0;
@@ -158,10 +158,10 @@ fn main() {
             shapecast: RShapeCast {
                 shape: sphere_shape,
                 scale: Vec3::ONE,
-                center_of_mass_start: rmat44_translation(Vec3::new(-5.0, 0.0, 0.0).into_jolt()),
+                center_of_mass_start: rmat44_translation(RVec3::new(-5.0, 0.0, 0.0).into_jolt()),
                 direction: Vec3::new(10.0, 0.0, 0.0),
             },
-            base_offset: Vec3::ZERO,
+            base_offset: RVec3::ZERO,
             settings: Default::default(),
             collector: Some(CastShapeCollectorImpl::new_borrowed(&mut collector)),
             broad_phase_layer_filter: None,
