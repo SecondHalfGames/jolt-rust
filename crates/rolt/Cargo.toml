@@ -11,7 +11,7 @@ double-precision = ["joltc-sys/double-precision"]
 object-layer-u32 = ["joltc-sys/object-layer-u32"]
 
 [dependencies]
-glam = "0.27.0"
+glam = "0.29.0"
 joltc-sys = { version = "0.3.1", path = "../joltc-sys" }
 paste = "1.0.15"
 
