@@ -44,6 +44,14 @@ impl<'physics_system> BodyInterface<'physics_system> {
         unsafe { JPC_BodyInterface_IsActive(self.raw, body_id.raw()) }
     }
 
+    pub fn user_data(&self, body_id: BodyId) -> u64 {
+        unsafe { JPC_BodyInterface_GetUserData(self.raw, body_id.raw()) }
+    }
+
+    pub fn set_user_data(&self, body_id: BodyId, user_data: u64) {
+        unsafe { JPC_BodyInterface_SetUserData(self.raw, body_id.raw(), user_data) }
+    }
+
     pub fn center_of_mass_position(&self, body_id: BodyId) -> RVec3 {
         unsafe { JPC_BodyInterface_GetCenterOfMassPosition(self.raw, body_id.raw()).into_rolt() }
     }
