@@ -23,6 +23,11 @@ impl<'interface> Body<'interface> {
         BodyId::new(raw)
     }
 
+    pub fn user_data(&self) -> u64 {
+        let raw = unsafe { JPC_Body_GetUserData(self.inner) };
+        raw
+    }
+
     pub fn as_raw(&self) -> *mut JPC_Body {
         self.inner
     }
