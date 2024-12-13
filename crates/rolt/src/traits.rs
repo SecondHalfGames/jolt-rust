@@ -279,6 +279,31 @@ impl<T: BodyFilter> BodyFilterBridge<T> {
     }
 }
 
+/// See also: Jolt's [`ShapeFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_shape_filter.html) class.
+pub trait ShapeFilter {
+    fn should_collide(&self, shape: *const JPC_Shape, subshape_id: JPC_SubShapeID) -> bool;
+}
+
+define_impl_struct!(const ShapeFilter {
+    ShouldCollide,
+});
+
+struct ShapeFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ShapeFilter> ShapeFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(
+        this: *const c_void,
+        shape: *const JPC_Shape,
+        subshape_id: JPC_SubShapeID,
+    ) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+
+        this.should_collide(shape, subshape_id)
+    }
+}
+
 pub trait CastShapeCollector {
     fn reset(&mut self);
     fn add_hit(&mut self, base: &mut CastShapeBase, result: &JPC_ShapeCastResult);

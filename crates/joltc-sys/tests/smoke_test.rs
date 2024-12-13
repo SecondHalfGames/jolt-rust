@@ -3,7 +3,7 @@ mod framework;
 use std::f32::consts::{PI, TAU};
 use std::ffi::c_void;
 use std::mem;
-use std::ptr::addr_of_mut;
+use std::ptr::{addr_of_mut, null_mut};
 
 use joltc_sys::*;
 use rand::Rng;
@@ -212,11 +212,26 @@ impl SmokeTest for NarrowPhaseRayCast {
 
         let query = JPC_PhysicsSystem_GetNarrowPhaseQuery(system);
 
+        extern "C" fn should_collide(
+            this: *const c_void,
+            shape: *const JPC_Shape,
+            subshape_id: u32,
+        ) -> bool {
+            true
+        }
+
+        let fns = JPC_ShapeFilterFns {
+            ShouldCollide: Some(should_collide as _),
+        };
+
+        let shape_filter = JPC_ShapeFilter_new(std::ptr::null(), fns);
+
         let mut args = JPC_NarrowPhaseQuery_CastRayArgs {
             Ray: JPC_RRayCast {
                 Origin: rvec3(1.0, 2.0, 0.0),
                 Direction: vec3(-2.0, 0.0, 0.0),
             },
+            ShapeFilter: shape_filter,
             ..mem::zeroed()
         };
         let hit = JPC_NarrowPhaseQuery_CastRay(query, &mut args);

@@ -5,7 +5,8 @@ use joltc_sys::*;
 
 use crate::{
     BodyFilterImpl, BodyId, BroadPhaseLayerFilterImpl, CastShapeBase, CastShapeCollector,
-    CastShapeCollectorImpl, FromJolt, IntoJolt, ObjectLayerFilterImpl, RVec3, Vec3,
+    CastShapeCollectorImpl, FromJolt, IntoJolt, ObjectLayerFilterImpl, RVec3, ShapeFilterImpl,
+    Vec3,
 };
 
 /// See also: Jolt's [`NarrowPhaseQuery`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_narrow_phase_query.html) class.
@@ -41,6 +42,7 @@ pub struct RayCastArgs {
     pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'static>>,
     pub object_layer_filter: Option<ObjectLayerFilterImpl<'static>>,
     pub body_filter: Option<BodyFilterImpl<'static>>,
+    pub shape_filter: Option<ShapeFilterImpl<'static>>,
 }
 
 /// The result of calling [`NarrowPhaseQuery::cast_ray`].
@@ -137,6 +139,7 @@ impl<'physics_system> NarrowPhaseQuery<'physics_system> {
             BroadPhaseLayerFilter: args.broad_phase_layer_filter.as_ref().into_jolt(),
             ObjectLayerFilter: args.object_layer_filter.as_ref().into_jolt(),
             BodyFilter: args.body_filter.as_ref().into_jolt(),
+            ShapeFilter: args.shape_filter.as_ref().into_jolt(),
         };
 
         let hit = unsafe { JPC_NarrowPhaseQuery_CastRay(self.raw, &mut raw_args) };
