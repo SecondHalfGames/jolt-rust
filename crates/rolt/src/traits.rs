@@ -304,6 +304,47 @@ impl<T: ShapeFilter> ShapeFilterBridge<T> {
     }
 }
 
+/// See also: Jolt's [`SimShapeFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_sim_shape_filter.html) class.
+pub trait SimShapeFilter {
+    fn should_collide(
+        &self,
+        body1: Body<'_>,
+        shape1: *const JPC_Shape,
+        subshape1: JPC_SubShapeID,
+        body2: Body<'_>,
+        shape2: *const JPC_Shape,
+        subshape2: JPC_SubShapeID,
+    ) -> bool;
+}
+
+define_impl_struct!(const SimShapeFilter {
+    ShouldCollide,
+});
+
+struct SimShapeFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: SimShapeFilter> SimShapeFilterBridge<T> {
+    unsafe extern "C" fn ShouldCollide(
+        this: *const c_void,
+        body1: *const JPC_Body,
+        shape1: *const JPC_Shape,
+        subshape1: JPC_SubShapeID,
+        body2: *const JPC_Body,
+        shape2: *const JPC_Shape,
+        subshape2: JPC_SubShapeID,
+    ) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+
+        // FIXME: `Body` should support a `const` version!
+        let body1 = Body::new(body1.cast_mut());
+        let body2 = Body::new(body2.cast_mut());
+
+        this.should_collide(body1, shape1, subshape1, body2, shape2, subshape2)
+    }
+}
+
 pub trait CastShapeCollector {
     fn reset(&mut self);
     fn add_hit(&mut self, base: &mut CastShapeBase, result: &JPC_ShapeCastResult);
