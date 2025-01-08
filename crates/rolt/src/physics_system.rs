@@ -4,7 +4,7 @@ use joltc_sys::*;
 
 use crate::{
     BodyInterface, BroadPhaseLayerInterfaceImpl, NarrowPhaseQuery, ObjectLayerPairFilterImpl,
-    ObjectVsBroadPhaseLayerFilterImpl,
+    ObjectVsBroadPhaseLayerFilterImpl, SimShapeFilterImpl,
 };
 
 /// The root of everything for a physics simulation.
@@ -15,6 +15,7 @@ pub struct PhysicsSystem {
     broad_phase_layer_interface: Option<BroadPhaseLayerInterfaceImpl<'static>>,
     object_vs_broad_phase_layer_filter: Option<ObjectVsBroadPhaseLayerFilterImpl<'static>>,
     object_layer_pair_filter: Option<ObjectLayerPairFilterImpl<'static>>,
+    sim_shape_filter: Option<SimShapeFilterImpl<'static>>,
 }
 
 impl PhysicsSystem {
@@ -25,6 +26,7 @@ impl PhysicsSystem {
                 broad_phase_layer_interface: None,
                 object_vs_broad_phase_layer_filter: None,
                 object_layer_pair_filter: None,
+                sim_shape_filter: None,
             }
         }
     }
@@ -62,6 +64,19 @@ impl PhysicsSystem {
                 ovbplf_raw,
                 olpf_raw,
             );
+        }
+    }
+
+    pub fn set_sim_shape_filter(
+        &mut self,
+        sim_shape_filter: impl Into<SimShapeFilterImpl<'static>>,
+    ) {
+        let sim_shape_filter = sim_shape_filter.into();
+        let raw = sim_shape_filter.as_raw();
+        self.sim_shape_filter = Some(sim_shape_filter);
+
+        unsafe {
+            JPC_PhysicsSystem_SetSimShapeFilter(self.raw, raw);
         }
     }
 
