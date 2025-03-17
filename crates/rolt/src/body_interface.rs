@@ -20,10 +20,14 @@ impl<'physics_system> BodyInterface<'physics_system> {
 
     /// # Safety
     /// `settings` must be initialized and valid, with a valid `Shape` pointer.
-    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> Body {
+    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> Option<Body> {
         let raw = JPC_BodyInterface_CreateBody(self.raw, settings);
 
-        Body::<'physics_system>::new(raw)
+        if raw.is_null() {
+            None
+        } else {
+            Some(Body::<'physics_system>::new(raw))
+        }
     }
 
     pub fn add_body(&self, body_id: BodyId, activation_mode: JPC_Activation) {

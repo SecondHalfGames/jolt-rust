@@ -12,6 +12,8 @@ pub struct Body<'interface> {
 
 impl<'interface> Body<'interface> {
     pub(crate) fn new(inner: *mut JPC_Body) -> Self {
+        assert!(!inner.is_null());
+
         Self {
             inner,
             _phantom: PhantomData,
