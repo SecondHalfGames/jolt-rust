@@ -11,6 +11,9 @@ exclude = ["JoltC/JoltPhysics/Assets", "JoltC/JoltPhysics/TestFramework", "JoltC
 [features]
 default = []
 
+# Enable Jolt's debug assertions
+asserts = []
+
 # Changes all world coordinates to use f64 instead of 32 coordinates.
 double-precision = []
 

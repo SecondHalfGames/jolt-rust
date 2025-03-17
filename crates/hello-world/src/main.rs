@@ -103,13 +103,15 @@ fn main() {
         })
         .unwrap();
 
-        let floor = body_interface.create_body(&JPC_BodyCreationSettings {
-            Position: rvec3(0.0, -1.0, 0.0),
-            MotionType: JPC_MOTION_TYPE_STATIC,
-            ObjectLayer: OL_NON_MOVING,
-            Shape: floor_shape,
-            ..Default::default()
-        });
+        let floor = body_interface
+            .create_body(&JPC_BodyCreationSettings {
+                Position: rvec3(0.0, -1.0, 0.0),
+                MotionType: JPC_MOTION_TYPE_STATIC,
+                ObjectLayer: OL_NON_MOVING,
+                Shape: floor_shape,
+                ..Default::default()
+            })
+            .unwrap();
         let floor_id = floor.id();
         body_interface.add_body(floor_id, JPC_ACTIVATION_DONT_ACTIVATE);
 
@@ -119,13 +121,15 @@ fn main() {
         })
         .unwrap();
 
-        let sphere = body_interface.create_body(&JPC_BodyCreationSettings {
-            Position: rvec3(0.0, 2.0, 0.0),
-            MotionType: JPC_MOTION_TYPE_DYNAMIC,
-            ObjectLayer: OL_MOVING,
-            Shape: sphere_shape,
-            ..Default::default()
-        });
+        let sphere = body_interface
+            .create_body(&JPC_BodyCreationSettings {
+                Position: rvec3(0.0, 2.0, 0.0),
+                MotionType: JPC_MOTION_TYPE_DYNAMIC,
+                ObjectLayer: OL_MOVING,
+                Shape: sphere_shape,
+                ..Default::default()
+            })
+            .unwrap();
         let sphere_id = sphere.id();
 
         body_interface.add_body(sphere_id, JPC_ACTIVATION_ACTIVATE);

@@ -3,7 +3,7 @@ mod framework;
 use std::f32::consts::{PI, TAU};
 use std::ffi::c_void;
 use std::mem;
-use std::ptr::{addr_of_mut, null_mut};
+use std::ptr::addr_of_mut;
 
 use joltc_sys::*;
 use rand::Rng;
@@ -213,9 +213,9 @@ impl SmokeTest for NarrowPhaseRayCast {
         let query = JPC_PhysicsSystem_GetNarrowPhaseQuery(system);
 
         extern "C" fn should_collide(
-            this: *const c_void,
-            shape: *const JPC_Shape,
-            subshape_id: u32,
+            _this: *const c_void,
+            _shape: *const JPC_Shape,
+            _subshape_id: u32,
         ) -> bool {
             true
         }

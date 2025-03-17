@@ -50,6 +50,10 @@ fn build_joltc() {
         config.configure_arg("-DOBJECT_LAYER_BITS=32");
     }
 
+    if cfg!(feature = "asserts") {
+        config.configure_arg("-DUSE_ASSERTS=ON");
+    }
+
     let mut dst = config.build();
 
     // Jolt and JoltC put libraries in the 'lib' subfolder. This goes against
