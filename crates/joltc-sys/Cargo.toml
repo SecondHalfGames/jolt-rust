@@ -25,7 +25,6 @@ object-layer-u32 = []
 [build-dependencies]
 bindgen = "0.69.1"
 cmake = "0.1.50"
-cc = { version = "1.0.94", features = ["parallel"] }
 walkdir = "2.5.0"
 anyhow = "1.0.69"
 

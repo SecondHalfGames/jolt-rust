@@ -36,22 +36,22 @@ fn build_joltc() {
     }
 
     // Having IPO/LTO turned on breaks lld on Windows.
-    config.configure_arg("-DINTERPROCEDURAL_OPTIMIZATION=OFF");
+    config.define("INTERPROCEDURAL_OPTIMIZATION", "OFF");
 
     // Warnings when building Jolt or JoltC don't matter to users of joltc-sys.
-    config.configure_arg("-DENABLE_ALL_WARNINGS=OFF");
+    config.define("ENABLE_ALL_WARNINGS", "OFF");
 
     // These feature flags go through CMake and affect compilation of both Jolt
     // and JoltC.
     if cfg!(feature = "double-precision") {
-        config.configure_arg("-DDOUBLE_PRECISION=ON");
+        config.define("DOUBLE_PRECISION", "ON");
     }
     if cfg!(feature = "object-layer-u32") {
-        config.configure_arg("-DOBJECT_LAYER_BITS=32");
+        config.define("OBJECT_LAYER_BITS", "32");
     }
 
     if cfg!(feature = "asserts") {
-        config.configure_arg("-DUSE_ASSERTS=ON");
+        config.define("USE_ASSERTS", "ON");
     }
 
     let mut dst = config.build();
