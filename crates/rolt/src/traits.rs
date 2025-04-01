@@ -123,6 +123,33 @@ macro_rules! define_impl_struct {
     };
 }
 
+/// See also: Jolt's [`GroupFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_group_filter.html) class.
+pub trait GroupFilter {
+    fn can_collide(&self, group_1: &JPC_CollisionGroup, group_2: &JPC_CollisionGroup) -> bool;
+}
+
+define_impl_struct!(const GroupFilter {
+    CanCollide,
+});
+
+struct GroupFilterBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: GroupFilter> GroupFilterBridge<T> {
+    unsafe extern "C" fn CanCollide(
+        this: *const c_void,
+        group_1: *const JPC_CollisionGroup,
+        group_2: *const JPC_CollisionGroup,
+    ) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+        let group_1 = &*group_1;
+        let group_2 = &*group_2;
+
+        this.can_collide(group_1, group_2)
+    }
+}
+
 /// See also: Jolt's [`BroadPhaseLayerInterface`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_broad_phase_layer_interface.html) class.
 pub trait BroadPhaseLayerInterface {
     fn get_num_broad_phase_layers(&self) -> u32;
