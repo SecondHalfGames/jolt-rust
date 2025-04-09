@@ -50,6 +50,10 @@ impl<T: RefTarget> RefConst<T> {
         T::add_ref(ptr);
         Self { ptr }
     }
+
+    pub fn get(&self) -> *const T {
+        self.ptr
+    }
 }
 
 impl<T: RefTarget> Deref for RefConst<T> {
@@ -92,6 +96,10 @@ impl<T: RefTarget> Ref<T> {
     pub unsafe fn from_active(ptr: *mut T) -> Self {
         T::add_ref(ptr);
         Self { ptr }
+    }
+
+    pub fn get(&self) -> *mut T {
+        self.ptr
     }
 }
 
