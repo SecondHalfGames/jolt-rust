@@ -1,5 +1,7 @@
 use std::ops::Deref;
 
+use joltc_sys::*;
+
 /// Rust version of Jolt's [`RefTarget`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_ref_target.html)
 /// CRTP.
 ///
@@ -13,13 +15,23 @@ pub unsafe trait RefTarget {
     unsafe fn release(value: *const Self);
 }
 
-unsafe impl RefTarget for joltc_sys::JPC_Shape {
+unsafe impl RefTarget for JPC_Shape {
     unsafe fn add_ref(value: *const Self) {
-        joltc_sys::JPC_Shape_AddRef(value);
+        JPC_Shape_AddRef(value);
     }
 
     unsafe fn release(value: *const Self) {
-        joltc_sys::JPC_Shape_Release(value);
+        JPC_Shape_Release(value);
+    }
+}
+
+unsafe impl RefTarget for JPC_MutableCompoundShape {
+    unsafe fn add_ref(value: *const Self) {
+        JPC_Shape_AddRef(value.cast::<JPC_Shape>());
+    }
+
+    unsafe fn release(value: *const Self) {
+        JPC_Shape_Release(value.cast::<JPC_Shape>());
     }
 }
 
@@ -33,10 +45,9 @@ impl<T: RefTarget> Ref<T> {
     ///
     /// # Safety
     ///
-    /// `ptr` must be valid and have an extra ref already added. More
-    /// specifically, the object's refcount must be equal to the number of
-    /// existing Ref types (C++ and Rust) plus one.
+    /// `ptr` must be valid.
     pub unsafe fn from_active(ptr: *const T) -> Self {
+        T::add_ref(ptr);
         Self { ptr }
     }
 }
