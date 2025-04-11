@@ -1,5 +1,5 @@
 # jolt-rust
-Rust bindings for [Jolt Physics](https://github.com/jrouwe/JoltPhysics) 5.1.0 using [JoltC].
+Rust bindings for [Jolt Physics](https://github.com/jrouwe/JoltPhysics) 5.3.0 using [JoltC].
 
 This project is an early work in progress. Watch for exposed nails.
 
