@@ -171,6 +171,7 @@ fn main() {
             broad_phase_layer_filter: None,
             object_layer_filter: None,
             body_filter: None,
+            shape_filter: None,
         });
 
         println!("Hit: {}", collector.result.is_some());

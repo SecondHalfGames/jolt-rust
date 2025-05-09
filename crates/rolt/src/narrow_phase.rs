@@ -81,7 +81,7 @@ pub struct CastShapeArgs<'a> {
     pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'static>>,
     pub object_layer_filter: Option<ObjectLayerFilterImpl<'static>>,
     pub body_filter: Option<BodyFilterImpl<'static>>,
-    // const JPC_ShapeFilter *ShapeFilter;
+    pub shape_filter: Option<ShapeFilterImpl<'static>>,
 }
 
 #[non_exhaustive]
@@ -167,7 +167,7 @@ impl<'physics_system> NarrowPhaseQuery<'physics_system> {
             BroadPhaseLayerFilter: args.broad_phase_layer_filter.as_ref().into_jolt(),
             ObjectLayerFilter: args.object_layer_filter.as_ref().into_jolt(),
             BodyFilter: args.body_filter.as_ref().into_jolt(),
-            // const JPC_ShapeFilter *ShapeFilter;
+            ShapeFilter: args.shape_filter.as_ref().into_jolt(),
             ..mem::zeroed()
         };
 
