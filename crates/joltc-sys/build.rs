@@ -60,13 +60,22 @@ fn build_joltc() {
     // the docs of the cmake crate, but it's possible that it's just mishandling
     // an output path and not account for the install target's configurability.
     dst.push("lib");
-
     println!("cargo:rustc-link-search=native={}", dst.display());
 
-    // On macOS, we need to explicitly link against the C++ standard library
-    // here to avoid getting missing symbol errors from Jolt/JoltC.
+    // On Fedora Workstation 42, it looks like Jolt puts libs in the "lib64"
+    // subfolder, so make sure to search there too.
+    dst.pop();
+    dst.push("lib64");
+    println!("cargo:rustc-link-search=native={}", dst.display());
+
+    // On macOS and Linux, we need to explicitly link against the C++ standard
+    // library here to avoid getting missing symbol errors from Jolt/JoltC.
     if cfg!(target_os = "macos") {
         println!("cargo:rustc-flags=-l dylib=c++");
+    }
+
+    if cfg!(target_os = "linux") {
+        println!("cargo:rustc-link-lib=dylib=stdc++");
     }
 }
 
