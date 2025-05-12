@@ -307,12 +307,26 @@ impl<T: BodyFilter> BodyFilterBridge<T> {
 }
 
 /// See also: Jolt's [`ShapeFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_shape_filter.html) class.
+#[allow(unused)]
 pub trait ShapeFilter {
-    fn should_collide(&self, shape: *const JPC_Shape, subshape_id: JPC_SubShapeID) -> bool;
+    fn should_collide(&self, shape2: *const JPC_Shape, subshape_id2: JPC_SubShapeID) -> bool {
+        true
+    }
+
+    fn should_collide_two_shapes(
+        &self,
+        shape1: *const JPC_Shape,
+        subshape_id1: JPC_SubShapeID,
+        shape2: *const JPC_Shape,
+        subshape_id2: JPC_SubShapeID,
+    ) -> bool {
+        true
+    }
 }
 
 define_impl_struct!(const ShapeFilter {
     ShouldCollide,
+    ShouldCollideTwoShapes,
 });
 
 struct ShapeFilterBridge<T> {
@@ -322,12 +336,24 @@ struct ShapeFilterBridge<T> {
 impl<T: ShapeFilter> ShapeFilterBridge<T> {
     unsafe extern "C" fn ShouldCollide(
         this: *const c_void,
-        shape: *const JPC_Shape,
-        subshape_id: JPC_SubShapeID,
+        shape2: *const JPC_Shape,
+        subshape_id2: JPC_SubShapeID,
     ) -> bool {
         let this = this.cast::<T>().as_ref().unwrap();
 
-        this.should_collide(shape, subshape_id)
+        this.should_collide(shape2, subshape_id2)
+    }
+
+    unsafe extern "C" fn ShouldCollideTwoShapes(
+        this: *const c_void,
+        shape1: *const JPC_Shape,
+        subshape_id1: JPC_SubShapeID,
+        shape2: *const JPC_Shape,
+        subshape_id2: JPC_SubShapeID,
+    ) -> bool {
+        let this = this.cast::<T>().as_ref().unwrap();
+
+        this.should_collide_two_shapes(shape1, subshape_id1, shape2, subshape_id2)
     }
 }
 
