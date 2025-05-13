@@ -222,6 +222,7 @@ impl SmokeTest for NarrowPhaseRayCast {
 
         let fns = JPC_ShapeFilterFns {
             ShouldCollide: Some(should_collide as _),
+            ShouldCollideTwoShapes: None,
         };
 
         let shape_filter = JPC_ShapeFilter_new(std::ptr::null(), fns);
