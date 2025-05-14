@@ -27,7 +27,7 @@ pub struct RRayCast {
 }
 
 impl RRayCast {
-    pub fn as_raw(&self) -> JPC_RRayCast {
+    pub fn raw(&self) -> JPC_RRayCast {
         JPC_RRayCast {
             Origin: self.origin.into_jolt(),
             Direction: self.direction.into_jolt(),
@@ -134,7 +134,7 @@ impl<'physics_system> NarrowPhaseQuery<'physics_system> {
 
     pub fn cast_ray(&self, args: RayCastArgs) -> Option<RayCastResult> {
         let mut raw_args = JPC_NarrowPhaseQuery_CastRayArgs {
-            Ray: args.ray.as_raw(),
+            Ray: args.ray.raw(),
             Result: unsafe { mem::zeroed() },
             BroadPhaseLayerFilter: args.broad_phase_layer_filter.as_ref().into_jolt(),
             ObjectLayerFilter: args.object_layer_filter.as_ref().into_jolt(),
@@ -174,7 +174,7 @@ impl<'physics_system> NarrowPhaseQuery<'physics_system> {
         JPC_NarrowPhaseQuery_CastShape(self.raw, &mut raw_args);
     }
 
-    pub fn as_raw(&self) -> *const JPC_NarrowPhaseQuery {
+    pub fn raw(&self) -> *const JPC_NarrowPhaseQuery {
         self.raw
     }
 }

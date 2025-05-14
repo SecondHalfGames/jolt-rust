@@ -129,7 +129,7 @@ impl<'physics_system> BodyInterface<'physics_system> {
         }
     }
 
-    pub fn as_raw(&self) -> *mut JPC_BodyInterface {
+    pub fn raw(&self) -> *mut JPC_BodyInterface {
         self.raw
     }
 }

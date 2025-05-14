@@ -86,7 +86,7 @@ macro_rules! define_impl_struct {
                     }
                 }
 
-                pub fn as_raw(&self) -> *mut [<JPC_ $base_name>] {
+                pub fn raw(&self) -> *mut [<JPC_ $base_name>] {
                     self.raw
                 }
             }
@@ -105,7 +105,7 @@ macro_rules! define_impl_struct {
 
                 fn into_jolt(self) -> Self::Jolt {
                     match self {
-                        Some(v) => v.as_raw(),
+                        Some(v) => v.raw(),
                         None => std::ptr::null_mut(),
                     }
                 }

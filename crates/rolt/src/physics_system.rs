@@ -42,15 +42,15 @@ impl PhysicsSystem {
         object_layer_pair_filter: impl Into<ObjectLayerPairFilterImpl<'static>>,
     ) {
         let bpli = broad_phase_layer_interface.into();
-        let bpli_raw = bpli.as_raw();
+        let bpli_raw = bpli.raw();
         self.broad_phase_layer_interface = Some(bpli);
 
         let ovbplf = object_vs_broad_phase_layer_filter.into();
-        let ovbplf_raw = ovbplf.as_raw();
+        let ovbplf_raw = ovbplf.raw();
         self.object_vs_broad_phase_layer_filter = Some(ovbplf);
 
         let olpf = object_layer_pair_filter.into();
-        let olpf_raw = olpf.as_raw();
+        let olpf_raw = olpf.raw();
         self.object_layer_pair_filter = Some(olpf);
 
         unsafe {
@@ -72,7 +72,7 @@ impl PhysicsSystem {
         sim_shape_filter: impl Into<SimShapeFilterImpl<'static>>,
     ) {
         let sim_shape_filter = sim_shape_filter.into();
-        let raw = sim_shape_filter.as_raw();
+        let raw = sim_shape_filter.raw();
         self.sim_shape_filter = Some(sim_shape_filter);
 
         unsafe {
@@ -150,7 +150,7 @@ impl PhysicsSystem {
         }
     }
 
-    pub fn as_raw(&self) -> *mut JPC_PhysicsSystem {
+    pub fn raw(&self) -> *mut JPC_PhysicsSystem {
         self.raw
     }
 }

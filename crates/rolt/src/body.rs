@@ -30,7 +30,7 @@ impl<'interface> Body<'interface> {
         raw
     }
 
-    pub fn as_raw(&self) -> *mut JPC_Body {
+    pub fn raw(&self) -> *mut JPC_Body {
         self.inner
     }
 }
