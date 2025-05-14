@@ -27,6 +27,7 @@ macro_rules! ffi_default {
 ffi_default! {
     JPC_BodyCreationSettings -> JPC_BodyCreationSettings_default,
     JPC_ShapeCastSettings -> JPC_ShapeCastSettings_default,
+    JPC_CollideShapeSettings -> JPC_CollideShapeSettings_default,
 
     // All of the ShapeSettings types
     JPC_TriangleShapeSettings -> JPC_TriangleShapeSettings_default,
