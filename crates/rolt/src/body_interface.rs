@@ -1,8 +1,9 @@
 use std::marker::PhantomData;
 
+use glam::Quat;
 use joltc_sys::*;
 
-use crate::{Body, BodyId, IntoJolt, IntoRolt, RVec3, Vec3};
+use crate::{Body, BodyId, IntoJolt, IntoRolt, ObjectLayer, RVec3, Vec3};
 
 /// See also: Jolt's [`BodyInterface`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_body_interface.html) class.
 pub struct BodyInterface<'physics_system> {
@@ -44,6 +45,24 @@ impl<'physics_system> BodyInterface<'physics_system> {
         unsafe { JPC_BodyInterface_DestroyBody(self.raw, body_id.raw()) }
     }
 
+    /// # Safety
+    /// `shape` must be a valid shape.
+    pub unsafe fn set_shape(
+        &self,
+        body_id: BodyId,
+        shape: *const JPC_Shape,
+        update_mass_properties: bool,
+        activation: JPC_Activation,
+    ) {
+        JPC_BodyInterface_SetShape(
+            self.raw,
+            body_id.raw(),
+            shape,
+            update_mass_properties,
+            activation,
+        )
+    }
+
     pub fn is_active(&self, body_id: BodyId) -> bool {
         unsafe { JPC_BodyInterface_IsActive(self.raw, body_id.raw()) }
     }
@@ -67,6 +86,46 @@ impl<'physics_system> BodyInterface<'physics_system> {
     pub fn set_linear_velocity(&self, body_id: BodyId, velocity: Vec3) {
         unsafe {
             JPC_BodyInterface_SetLinearVelocity(self.raw, body_id.raw(), velocity.into_jolt());
+        }
+    }
+
+    pub fn set_object_layer(&self, body_id: BodyId, object_layer: ObjectLayer) {
+        unsafe { JPC_BodyInterface_SetObjectLayer(self.raw, body_id.raw(), object_layer.raw()) }
+    }
+
+    pub fn notify_shape_changed(
+        &self,
+        body_id: BodyId,
+        old_com: Vec3,
+        update_mass_properties: bool,
+        activation: JPC_Activation,
+    ) {
+        unsafe {
+            JPC_BodyInterface_NotifyShapeChanged(
+                self.raw,
+                body_id.raw(),
+                old_com.into_jolt(),
+                update_mass_properties,
+                activation,
+            )
+        }
+    }
+
+    pub fn set_position_and_rotation_when_changed(
+        &self,
+        body_id: BodyId,
+        pos: RVec3,
+        rot: Quat,
+        activation: JPC_Activation,
+    ) {
+        unsafe {
+            JPC_BodyInterface_SetPositionAndRotationWhenChanged(
+                self.raw,
+                body_id.raw(),
+                pos.into_jolt(),
+                rot.into_jolt(),
+                activation,
+            )
         }
     }
 
