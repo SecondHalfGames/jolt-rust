@@ -125,12 +125,12 @@ impl CastShapeCollector for ClosestHitCastShapeCollector {
 }
 
 pub struct CollideShapeArgs<'a> {
-    shape: *const JPC_Shape,
-    shape_scale: Vec3,
-    center_of_mass_transform: JPC_RMat44,
-    settings: JPC_CollideShapeSettings,
-    base_offset: RVec3,
-    collector: Option<CollideShapeCollectorImpl<'a>>,
+    pub shape: *const JPC_Shape,
+    pub shape_scale: Vec3,
+    pub center_of_mass_transform: JPC_RMat44,
+    pub settings: JPC_CollideShapeSettings,
+    pub base_offset: RVec3,
+    pub collector: Option<CollideShapeCollectorImpl<'a>>,
     pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'a>>,
     pub object_layer_filter: Option<ObjectLayerFilterImpl<'a>>,
     pub body_filter: Option<BodyFilterImpl<'a>>,
