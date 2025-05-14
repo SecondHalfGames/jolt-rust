@@ -18,3 +18,7 @@ paste = "1.0.15"
 [lints.clippy]
 new_without_default = { level = "allow" }
 too_many_arguments = { level = "allow" }
+
+# bindgen structs often have padding and we want to use ..zeroed() to catch
+# those cases usually.
+needless_update = { level = "allow" }

@@ -440,3 +440,46 @@ impl<T: CastShapeCollector> CastShapeCollectorBridge<T> {
         this.reset();
     }
 }
+
+pub trait CollideShapeCollector {
+    fn reset(&mut self);
+    fn add_hit(&mut self, base: &mut CollideShapeBase, result: &JPC_CollideShapeResult);
+}
+
+pub struct CollideShapeBase {
+    base: *mut JPC_CollideShapeCollector,
+}
+
+impl CollideShapeBase {
+    pub fn update_early_out_fraction(&mut self, fraction: f32) {
+        unsafe {
+            JPC_CollideShapeCollector_UpdateEarlyOutFraction(self.base, fraction);
+        }
+    }
+}
+
+define_impl_struct!(mut CollideShapeCollector { Reset, AddHit });
+
+struct CollideShapeCollectorBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: CollideShapeCollector> CollideShapeCollectorBridge<T> {
+    unsafe extern "C" fn AddHit(
+        this: *mut c_void,
+        base: *mut JPC_CollideShapeCollector,
+        result: *const JPC_CollideShapeResult,
+    ) {
+        let this = this.cast::<T>().as_mut().unwrap();
+        let mut base = CollideShapeBase { base };
+        let result = &*result;
+
+        this.add_hit(&mut base, result);
+    }
+
+    unsafe extern "C" fn Reset(this: *mut c_void) {
+        let this = this.cast::<T>().as_mut().unwrap();
+
+        this.reset();
+    }
+}
