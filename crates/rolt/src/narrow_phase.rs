@@ -37,12 +37,12 @@ impl RRayCast {
 
 /// Arguments for [`NarrowPhaseQuery::cast_ray`].
 #[derive(Default)]
-pub struct RayCastArgs {
+pub struct RayCastArgs<'a> {
     pub ray: RRayCast,
-    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'static>>,
-    pub object_layer_filter: Option<ObjectLayerFilterImpl<'static>>,
-    pub body_filter: Option<BodyFilterImpl<'static>>,
-    pub shape_filter: Option<ShapeFilterImpl<'static>>,
+    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'a>>,
+    pub object_layer_filter: Option<ObjectLayerFilterImpl<'a>>,
+    pub body_filter: Option<BodyFilterImpl<'a>>,
+    pub shape_filter: Option<ShapeFilterImpl<'a>>,
 }
 
 /// The result of calling [`NarrowPhaseQuery::cast_ray`].
@@ -78,10 +78,10 @@ pub struct CastShapeArgs<'a> {
     pub base_offset: RVec3,
     pub settings: JPC_ShapeCastSettings,
     pub collector: Option<CastShapeCollectorImpl<'a>>,
-    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'static>>,
-    pub object_layer_filter: Option<ObjectLayerFilterImpl<'static>>,
-    pub body_filter: Option<BodyFilterImpl<'static>>,
-    pub shape_filter: Option<ShapeFilterImpl<'static>>,
+    pub broad_phase_layer_filter: Option<BroadPhaseLayerFilterImpl<'a>>,
+    pub object_layer_filter: Option<ObjectLayerFilterImpl<'a>>,
+    pub body_filter: Option<BodyFilterImpl<'a>>,
+    pub shape_filter: Option<ShapeFilterImpl<'a>>,
 }
 
 #[non_exhaustive]
