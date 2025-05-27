@@ -123,6 +123,69 @@ macro_rules! define_impl_struct {
     };
 }
 
+/// See also: Jolt's [`ContactListener`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_contact_listener.html) class.
+pub trait ContactListener {
+    fn on_contact_added(
+        &self,
+        body1: &JPC_Body,
+        body2: &JPC_Body,
+        manifold: &JPC_ContactManifold,
+        settings: &mut JPC_ContactSettings,
+    );
+
+    fn on_contact_persisted(
+        &self,
+        body1: &JPC_Body,
+        body2: &JPC_Body,
+        manifold: &JPC_ContactManifold,
+        settings: &mut JPC_ContactSettings,
+    );
+
+    fn on_contact_removed(&self, sub_shape_pair: &JPC_SubShapeIDPair);
+}
+
+define_impl_struct!(mut ContactListener {
+    OnContactAdded,
+    OnContactPersisted,
+    OnContactRemoved,
+});
+
+struct ContactListenerBridge<T> {
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ContactListener> ContactListenerBridge<T> {
+    unsafe extern "C" fn OnContactAdded(
+        this: *mut c_void,
+        body1: *const JPC_Body,
+        body2: *const JPC_Body,
+        manifold: *const JPC_ContactManifold,
+        settings: *mut JPC_ContactSettings,
+    ) {
+        let this = this.cast::<T>().as_ref().unwrap();
+        this.on_contact_added(&*body1, &*body2, &*manifold, &mut *settings)
+    }
+
+    unsafe extern "C" fn OnContactPersisted(
+        this: *mut c_void,
+        body1: *const JPC_Body,
+        body2: *const JPC_Body,
+        manifold: *const JPC_ContactManifold,
+        settings: *mut JPC_ContactSettings,
+    ) {
+        let this = this.cast::<T>().as_ref().unwrap();
+        this.on_contact_persisted(&*body1, &*body2, &*manifold, &mut *settings)
+    }
+
+    unsafe extern "C" fn OnContactRemoved(
+        this: *mut c_void,
+        sub_shape_pair: *const JPC_SubShapeIDPair,
+    ) {
+        let this = this.cast::<T>().as_ref().unwrap();
+        this.on_contact_removed(&*sub_shape_pair);
+    }
+}
+
 /// See also: Jolt's [`GroupFilter`](https://jrouwe.github.io/JoltPhysicsDocs/5.1.0/class_group_filter.html) class.
 pub trait GroupFilter {
     fn can_collide(&self, group_1: &JPC_CollisionGroup, group_2: &JPC_CollisionGroup) -> bool;
