@@ -3,8 +3,8 @@ use std::ptr;
 use joltc_sys::*;
 
 use crate::{
-    BodyInterface, BroadPhaseLayerInterfaceImpl, NarrowPhaseQuery, ObjectLayerPairFilterImpl,
-    ObjectVsBroadPhaseLayerFilterImpl, SimShapeFilterImpl,
+    BodyInterface, BroadPhaseLayerInterfaceImpl, ContactListenerImpl, NarrowPhaseQuery,
+    ObjectLayerPairFilterImpl, ObjectVsBroadPhaseLayerFilterImpl, SimShapeFilterImpl,
 };
 
 /// The root of everything for a physics simulation.
@@ -16,6 +16,7 @@ pub struct PhysicsSystem {
     object_vs_broad_phase_layer_filter: Option<ObjectVsBroadPhaseLayerFilterImpl<'static>>,
     object_layer_pair_filter: Option<ObjectLayerPairFilterImpl<'static>>,
     sim_shape_filter: Option<SimShapeFilterImpl<'static>>,
+    contact_listener: Option<ContactListenerImpl<'static>>,
 }
 
 impl PhysicsSystem {
@@ -27,6 +28,7 @@ impl PhysicsSystem {
                 object_vs_broad_phase_layer_filter: None,
                 object_layer_pair_filter: None,
                 sim_shape_filter: None,
+                contact_listener: None,
             }
         }
     }
@@ -77,6 +79,25 @@ impl PhysicsSystem {
 
         unsafe {
             JPC_PhysicsSystem_SetSimShapeFilter(self.raw, raw);
+        }
+    }
+
+    pub fn set_contact_listener(
+        &mut self,
+        contact_listener: Option<impl Into<ContactListenerImpl<'static>>>,
+    ) {
+        if let Some(contact_listener) = contact_listener {
+            let contact_listener = contact_listener.into();
+            let raw = contact_listener.raw();
+            self.contact_listener = Some(contact_listener);
+
+            unsafe {
+                JPC_PhysicsSystem_SetContactListener(self.raw, raw);
+            }
+        } else {
+            unsafe {
+                JPC_PhysicsSystem_SetContactListener(self.raw, ptr::null_mut());
+            }
         }
     }
 
