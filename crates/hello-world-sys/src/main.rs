@@ -174,7 +174,7 @@ fn main() {
                 delta_time,
                 collision_steps,
                 temp_allocator,
-                job_system,
+                job_system.cast::<JPC_JobSystem>(),
             );
         }
 
