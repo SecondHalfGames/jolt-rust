@@ -160,7 +160,7 @@ pub fn run_test<S: SmokeTest>() {
                 delta_time,
                 collision_steps,
                 temp_allocator,
-                job_system,
+                job_system.cast::<JPC_JobSystem>(),
             );
 
             if !test.post_update(physics_system) {
