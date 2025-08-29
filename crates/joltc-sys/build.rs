@@ -7,7 +7,6 @@ fn main() {
     let flags = build_flags();
 
     build_joltc();
-    link();
     generate_bindings(&flags).unwrap();
 }
 
@@ -68,6 +67,8 @@ fn build_joltc() {
     dst.push("lib64");
     println!("cargo:rustc-link-search=native={}", dst.display());
 
+    link();
+
     // On macOS and Linux, we need to explicitly link against the C++ standard
     // library here to avoid getting missing symbol errors from Jolt/JoltC.
     if cfg!(target_os = "macos") {
@@ -80,8 +81,8 @@ fn build_joltc() {
 }
 
 fn link() {
-    println!("cargo:rustc-link-lib=Jolt");
     println!("cargo:rustc-link-lib=joltc");
+    println!("cargo:rustc-link-lib=Jolt");
 }
 
 /// Generate build flags specifically for generating bindings.
