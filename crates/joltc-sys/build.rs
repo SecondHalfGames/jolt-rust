@@ -86,6 +86,43 @@ fn build_joltc() {
         config.generator("Ninja");
     }
 
+    // Native iOS cross-compile setup. cargo-side targets are
+    // `aarch64-apple-ios` (device) and `aarch64-apple-ios-sim`
+    // (simulator on Apple Silicon hosts); `x86_64-apple-ios` is the
+    // legacy Intel-Mac simulator path. CMake distinguishes device vs
+    // simulator via `CMAKE_OSX_SYSROOT` (`iphoneos` vs
+    // `iphonesimulator`); cargo-side the simulator is identified by
+    // `CARGO_CFG_TARGET_ABI=sim`. Without this branch, CMake builds
+    // against the macOS SDK and the resulting static libs fail at
+    // link time with `undefined symbol` for every iOS-specific
+    // runtime symbol cargo expects to find.
+    if target_os == "ios" {
+        config.define("CMAKE_SYSTEM_NAME", "iOS");
+        let osx_arch = match target_arch.as_str() {
+            "aarch64" => "arm64",
+            "x86_64" => "x86_64",
+            _ => panic!("unsupported iOS target arch: {target_arch}"),
+        };
+        config.define("CMAKE_OSX_ARCHITECTURES", osx_arch);
+        let target_abi = env::var("CARGO_CFG_TARGET_ABI").unwrap_or_default();
+        let sysroot = if target_abi == "sim" || target_arch == "x86_64" {
+            "iphonesimulator"
+        } else {
+            "iphoneos"
+        };
+        config.define("CMAKE_OSX_SYSROOT", sysroot);
+        // iOS 12 is the floor for arm64-only devices (post iPhone 5s)
+        // and aligns with Apple's current minimum-supported deployment
+        // target tier; consumers can override via cmake's standard
+        // env var if they need a different floor.
+        config.define("CMAKE_OSX_DEPLOYMENT_TARGET", "12.0");
+        // Force Ninja so the build is generator-agnostic on macos
+        // CI runners (which have both Xcode and Ninja). Xcode generator
+        // works too but is slower and pulls in Xcode-specific scheme
+        // noise we don't need for a static lib.
+        config.generator("Ninja");
+    }
+
     // Having IPO/LTO turned on breaks lld on Windows.
     config.define("INTERPROCEDURAL_OPTIMIZATION", "OFF");
 
@@ -161,6 +198,10 @@ fn build_flags() -> Vec<(&'static str, &'static str)> {
 }
 
 fn generate_bindings(flags: &[(&'static str, &'static str)]) -> anyhow::Result<()> {
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+    let target_abi = env::var("CARGO_CFG_TARGET_ABI").unwrap_or_default();
+
     let mut builder = bindgen::Builder::default()
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .header("JoltC/JoltC/JoltC.h")
@@ -168,6 +209,38 @@ fn generate_bindings(flags: &[(&'static str, &'static str)]) -> anyhow::Result<(
         .allowlist_item("JPC_.*")
         .default_enum_style(bindgen::EnumVariation::Consts)
         .prepend_enum_name(false);
+
+    // bindgen's default behaviour passes `TARGET` (rustc's triple) to
+    // clang. rustc's iOS-simulator triple `aarch64-apple-ios-sim` is
+    // invalid clang syntax — clang errors with `version 'sim' in
+    // target triple is invalid`. Translate to clang's recognised form
+    // (`arm64-apple-ios-simulator` for sim, `arm64-apple-ios` for
+    // device) and supply the matching SDK sysroot via `xcrun` so iOS
+    // system headers (stdint.h, etc.) resolve correctly. macOS host
+    // is the only supported iOS-host today (Apple SDKs are gated to
+    // that platform).
+    if target_os == "ios" {
+        let clang_target = match (target_arch.as_str(), target_abi.as_str()) {
+            ("aarch64", "sim") => "arm64-apple-ios-simulator",
+            ("aarch64", _) => "arm64-apple-ios",
+            ("x86_64", _) => "x86_64-apple-ios-simulator",
+            _ => panic!("unsupported iOS arch/abi: {target_arch}/{target_abi}"),
+        };
+        builder = builder.clang_arg(format!("--target={clang_target}"));
+
+        let sdk_name = if target_abi == "sim" || target_arch == "x86_64" {
+            "iphonesimulator"
+        } else {
+            "iphoneos"
+        };
+        let sdk_output = std::process::Command::new("xcrun")
+            .args(["--sdk", sdk_name, "--show-sdk-path"])
+            .output()
+            .with_context(|| format!("failed to invoke `xcrun --sdk {sdk_name}`"))?;
+        let sdk_path = String::from_utf8(sdk_output.stdout).context("xcrun output is not utf-8")?;
+        let sdk_path = sdk_path.trim();
+        builder = builder.clang_arg(format!("-isysroot{sdk_path}"));
+    }
 
     for (key, value) in flags {
         builder = builder.clang_arg(format!("-D{key}={value}"));
