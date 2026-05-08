@@ -36,6 +36,7 @@ ffi_default! {
     JPC_SphereShapeSettings -> JPC_SphereShapeSettings_default,
     JPC_CapsuleShapeSettings -> JPC_CapsuleShapeSettings_default,
     JPC_CylinderShapeSettings -> JPC_CylinderShapeSettings_default,
+    JPC_PlaneShapeSettings -> JPC_PlaneShapeSettings_default,
     JPC_ConvexHullShapeSettings -> JPC_ConvexHullShapeSettings_default,
     JPC_SubShapeSettings -> JPC_SubShapeSettings_default,
     JPC_StaticCompoundShapeSettings -> JPC_StaticCompoundShapeSettings_default,
