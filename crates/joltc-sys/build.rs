@@ -37,12 +37,6 @@ fn build_joltc() {
     // Jolt fails to compile via the cmake crate without specifying exception
     // handling behavior under MSVC. I'm not sure that this is the correct
     // exception handling mode.
-    //
-    // The original `cfg!(windows)` is a HOST-OS check (build.rs runs on
-    // the host, so it is always true on Windows). When cross-compiling
-    // to Android from a Windows host, NDK clang receives `/EHsc` as a
-    // path argument and errors. Switch to the target check so the flag
-    // only applies to actual Windows targets.
     if target_os == "windows" {
         config.cxxflag("/EHsc");
     }
