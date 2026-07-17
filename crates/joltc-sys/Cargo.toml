@@ -20,6 +20,24 @@ double-precision = []
 # Changes ObjectLayer and related types to be u32 instead of u16.
 object-layer-u32 = []
 
+# Pins JoltPhysics' floating-point flags to the cross-platform-deterministic
+# settings JPH gates on its `CROSS_PLATFORM_DETERMINISTIC` CMake variable
+# (see JoltPhysics' `Build/CMakeLists.txt` + `Jolt/Jolt.cmake`):
+# - MSVC: `/fp:fast` (default) → `/fp:precise`
+# - Clang ≥14: `+ -ffp-contract=off` (so mul+add doesn't fold into FMA inside
+#   `JPH_PRECISE_MATH_OFF` blocks)
+# - x86: `USE_FMADD AND NOT CROSS_PLATFORM_DETERMINISTIC` flips FMADD off
+#
+# Required for cross-platform-deterministic builds (P2P-deterministic netcode,
+# rollback-replayable simulation). Without this feature, the C++ build picks
+# the platform default — most acutely problematic on Windows MSVC where
+# `/fp:fast` is the default, producing non-deterministic floating point even
+# at the same git SHA on the same machine when toolchain settings differ.
+#
+# Default-off; ~10% perf cost (FMA disabled, more conservative FP rules).
+# Mirrors the `enhanced-determinism` cargo feature shape on rapier3d.
+cross-platform-deterministic = []
+
 [dependencies]
 
 [build-dependencies]

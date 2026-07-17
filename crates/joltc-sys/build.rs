@@ -99,6 +99,17 @@ fn build_joltc() {
         config.define("USE_ASSERTS", "ON");
     }
 
+    // Pin JoltPhysics' floating-point flags to the cross-platform-
+    // deterministic settings JPH gates on the same-named CMake var
+    // (see Build/CMakeLists.txt + Jolt/Jolt.cmake). MSVC swaps
+    // /fp:fast → /fp:precise; Clang ≥14 adds -ffp-contract=off; x86
+    // disables FMADD. Required for cross-platform-deterministic
+    // builds (P2P-deterministic netcode, rollback-replayable sims).
+    // ~10% perf cost; mirrors rapier3d's `enhanced-determinism`.
+    if cfg!(feature = "cross-platform-deterministic") {
+        config.define("CROSS_PLATFORM_DETERMINISTIC", "ON");
+    }
+
     let mut dst = config.build();
 
     // Jolt and JoltC put libraries in the 'lib' subfolder. This goes against
