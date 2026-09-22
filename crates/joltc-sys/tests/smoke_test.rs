@@ -214,8 +214,9 @@ impl SmokeTest for NarrowPhaseRayCast {
 
         extern "C" fn should_collide(
             _this: *const c_void,
+            _filter: *const JPC_ShapeFilter,
             _shape: *const JPC_Shape,
-            _subshape_id: u32,
+            _subshape_id: JPC_SubShapeID,
         ) -> bool {
             true
         }
