@@ -1,7 +1,7 @@
 // someday:
 // #![forbid(unsafe_code)]
 
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr, CString, c_char, c_uint};
 use std::ptr;
 
 // Everything prefixed with `JPC_` comes from the joltc_sys crate.
@@ -60,12 +60,38 @@ impl ObjectLayerPairFilter for ObjectLayerPair {
     }
 }
 
+/// # SAFETY
+/// This function is called by Jolt, so I think it's really their
+/// responsibility, huh?
+pub unsafe extern "C" fn assert_failed(
+    expression: *const c_char,
+    message: *const c_char,
+    file: *const c_char,
+    line: c_uint,
+) -> bool {
+    static BAD_UTF8_MESSAGE: &str = "Jolt raised an assertion but it contained invalid UTF-8";
+
+    unsafe {
+        let expression = CStr::from_ptr(expression).to_str().expect(BAD_UTF8_MESSAGE);
+        let message = if message.is_null() {
+            "<no message>"
+        } else {
+            CStr::from_ptr(message).to_str().expect(BAD_UTF8_MESSAGE)
+        };
+        let file = CStr::from_ptr(file).to_str().expect(BAD_UTF8_MESSAGE);
+
+        panic!("{file}:{line} ({expression}) {message}");
+    }
+}
+
 fn main() {
     rolt::register_default_allocator();
     rolt::factory_init();
     rolt::register_types();
 
     unsafe {
+        joltc_sys::JPC_SetAssertFailed(Some(assert_failed));
+
         let temp_allocator = JPC_TempAllocatorImpl_new(10 * 1024 * 1024);
 
         let job_system =

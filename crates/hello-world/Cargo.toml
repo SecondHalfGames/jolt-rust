@@ -8,4 +8,4 @@ edition = "2021"
 
 [dependencies]
 rolt = { path = "../rolt" }
-joltc-sys = { path = "../joltc-sys" }
+joltc-sys = { path = "../joltc-sys", features = ["asserts"] }
