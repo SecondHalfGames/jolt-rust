@@ -25,6 +25,7 @@ macro_rules! ffi_default {
 }
 
 ffi_default! {
+    JPC_MassProperties -> JPC_MassProperties_default,
     JPC_BodyCreationSettings -> JPC_BodyCreationSettings_default,
     JPC_ShapeCastSettings -> JPC_ShapeCastSettings_default,
     JPC_CollideShapeSettings -> JPC_CollideShapeSettings_default,
