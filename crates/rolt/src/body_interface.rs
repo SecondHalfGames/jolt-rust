@@ -133,3 +133,5 @@ impl<'physics_system> BodyInterface<'physics_system> {
         self.raw
     }
 }
+
+unsafe impl Sync for BodyInterface<'_> {}
