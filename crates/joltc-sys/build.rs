@@ -126,11 +126,11 @@ fn build_joltc() {
 
     // On macOS and Linux, we need to explicitly link against the C++ standard
     // library here to avoid getting missing symbol errors from Jolt/JoltC.
-    if cfg!(target_os = "macos") {
+    if target_os == "macos" {
         println!("cargo:rustc-flags=-l dylib=c++");
     }
 
-    if cfg!(target_os = "linux") {
+    if target_os == "linux" {
         println!("cargo:rustc-link-lib=dylib=stdc++");
     }
 }
