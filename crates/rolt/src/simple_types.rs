@@ -1,3 +1,5 @@
+use std::mem::transmute;
+
 use joltc_sys::*;
 
 /// Represents an object layer, which is internally either a u16 or a u32.
@@ -30,6 +32,7 @@ impl BroadPhaseLayer {
 
 /// An ID that can be used to access a body using [`BodyInterface`][crate::BodyInterface].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd)]
+#[repr(transparent)]
 pub struct BodyId(JPC_BodyID);
 
 impl BodyId {
@@ -39,5 +42,10 @@ impl BodyId {
 
     pub const fn raw(self) -> JPC_BodyID {
         self.0
+    }
+
+    pub const fn slice_raw(slice: &[Self]) -> &[JPC_BodyID] {
+        // SAFETY: Safe because BodyId is repr(transparent)
+        unsafe { transmute::<&[Self], &[JPC_BodyID]>(slice) }
     }
 }

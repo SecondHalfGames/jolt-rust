@@ -21,7 +21,7 @@ impl<'physics_system> BodyInterface<'physics_system> {
 
     /// # Safety
     /// `settings` must be initialized and valid, with a valid `Shape` pointer.
-    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> Option<Body> {
+    pub unsafe fn create_body(&self, settings: &JPC_BodyCreationSettings) -> Option<Body<'_>> {
         let raw = JPC_BodyInterface_CreateBody(self.raw, settings);
 
         if raw.is_null() {
@@ -34,6 +34,22 @@ impl<'physics_system> BodyInterface<'physics_system> {
     pub fn add_body(&self, body_id: BodyId, activation_mode: JPC_Activation) {
         unsafe {
             JPC_BodyInterface_AddBody(self.raw, body_id.raw(), activation_mode);
+        }
+    }
+
+    pub fn activate_body(&self, body_id: BodyId) {
+        unsafe {
+            JPC_BodyInterface_ActivateBody(self.raw, body_id.raw());
+        }
+    }
+
+    pub fn activate_bodies(&self, body_ids: &[BodyId]) {
+        unsafe {
+            JPC_BodyInterface_ActivateBodies(
+                self.raw,
+                BodyId::slice_raw(body_ids).as_ptr(),
+                body_ids.len() as i32,
+            );
         }
     }
 
