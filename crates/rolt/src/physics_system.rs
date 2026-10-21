@@ -164,6 +164,13 @@ impl PhysicsSystem {
         }
     }
 
+    pub fn body_interface_no_lock(&self) -> BodyInterface<'_> {
+        unsafe {
+            let raw = JPC_PhysicsSystem_GetBodyInterfaceNoLock(self.raw);
+            BodyInterface::new(raw)
+        }
+    }
+
     pub fn narrow_phase_query(&self) -> NarrowPhaseQuery<'_> {
         unsafe {
             let raw = JPC_PhysicsSystem_GetNarrowPhaseQuery(self.raw);
