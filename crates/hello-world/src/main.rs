@@ -1,7 +1,7 @@
 // someday:
 // #![forbid(unsafe_code)]
 
-use std::ffi::{CStr, CString, c_char, c_uint};
+use std::ffi::{c_char, c_uint, CStr, CString};
 use std::ptr;
 
 // Everything prefixed with `JPC_` comes from the joltc_sys crate.
