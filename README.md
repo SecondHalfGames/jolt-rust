@@ -1,5 +1,5 @@
 # jolt-rust
-Rust bindings for [Jolt Physics](https://github.com/jrouwe/JoltPhysics) 5.3.0 using [JoltC].
+Rust bindings for [Jolt Physics](https://github.com/jrouwe/JoltPhysics) 5.6.0 using [JoltC].
 
 This project is an early work in progress. Watch for exposed nails.
 
@@ -13,7 +13,7 @@ This project is an early work in progress. Watch for exposed nails.
 This crate contains unsafe bindings to JoltC.
 
 ```toml
-joltc-sys = "0.2.0"
+joltc-sys = "0.3.1"
 ```
 
 Features:
@@ -26,7 +26,7 @@ This crate contains a higher-level wrapper around JoltC, providing ergonomics co
 The safety of this crate is currently provided on a best-effort basis.
 
 ```toml
-rolt = "0.2.0"
+rolt = "0.3.1"
 ```
 
 Features:
